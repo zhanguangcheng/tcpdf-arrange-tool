@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>TCPDP排版工具</title>
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*270</h2>
+    <div id="container" style="font-family:仿宋;"></div>
+    <ul id="tool-bar-title">
+        <li><label><input type="radio" name="tool" value="global" checked>全局配置</label></li>
+        <li><label><input type="radio" name="tool" value="text">文本</label></li>
+        <li><label><input type="radio" name="tool" value="cell">单元格</label></li>
+        <li><label><input type="radio" name="tool" value="qrcode">二维码</label></li>
+        <li><label><input type="radio" name="tool" value="underline">下划线</label></li>
+    </ul>
+    <form id="form">
+        <ul id="tool-bar-content">
+            <li class="type-global">
+                <ul>
+                    <li><label>标题：</label><input type="text" name="global.title" value="Title"></li>
+                    <li><label>创建者：</label><input type="text" name="global.creator" value="Creator"></li>
+                    <li><label>作者：</label><input type="text" name="global.author" value="Author"></li>
+                    <li>
+                        <label>字体：</label>
+                        <select name="global.font.family">
+                            <option value="simfang" selected>仿宋</option>
+                            <option value="simhei">黑体</option>
+                            <option value="simkai">楷体</option>
+                        </select>
+                    </li>
+                    <li>
+                        <label>纸张大小：</label>
+                        <select name="global.paper.size">
+                            <option value="A3">A3</option>
+                            <option value="A4" selected>A4</option>
+                            <option value="A5">A5</option>
+                            <option value="B4">B4</option>
+                            <option value="B5">B5</option>
+                        </select>
+                    </li>
+                </ul>
+            </li>
+            <li class="type-text hide">
+                <ul>
+                    <li><label>X：</label><input type="number" name="text.x" value=""></li>
+                    <li><label>Y：</label><input type="number" name="text.y" value=""></li>
+                    <li><label>字体大小：</label><input type="number" name="text.font.size" value="10"></li>
+                    <li><label>文本：</label><input type="text" name="text.text" value="Text"></li>
+                </ul>
+            </li>
+            <li class="type-cell hide">
+                <ul>
+                    <li><label>X：</label><input type="number" name="cell.x" value=""></li>
+                    <li><label>Y：</label><input type="number" name="cell.y" value=""></li>
+                    <li><label>宽度：</label><input type="number" name="cell.width" value="30"></li>
+                    <li><label>高度：</label><input type="number" name="cell.height" value="7"></li>
+                    <li><label>字体大小：</label><input type="number" name="cell.font.size" value="10"></li>
+                    <li><label>文本：</label><textarea name="cell.text">Text</textarea></li>
+                    <li>
+                        <label>边框：</label>
+                        <input type="checkbox" name="cell.border.left" value="1" style="position:relative;left:0px;" checked>
+                        <input type="checkbox" name="cell.border.top" value="1" style="position:relative;left:-10px;top:-7px;" checked>
+                        <input type="checkbox" name="cell.border.right" value="1" style="position:relative;left:-20px;">
+                        <input type="checkbox" name="cell.border.bottom" value="1"style="position:relative;top:7px;left:-57px;">
+                    </li>
+                    <li>
+                        <label>水平对齐方式：</label>
+                        <label><input type="radio" name="cell.align" value="left" checked>左</label>
+                        <label><input type="radio" name="cell.align" value="center">中</label>
+                        <label><input type="radio" name="cell.align" value="right">右</label>
+                    </li>
+                </ul>
+            </li>
+            <li class="hide">
+                <ul>
+                    <li><label>X：</label><input type="number" name="qrcode.x" value=""></li>
+                    <li><label>Y：</label><input type="number" name="qrcode.y" value=""></li>
+                    <li><label>文本：</label><input type="text" name="qrcode.text" value="Text"></li>
+                    <li><label>宽高：</label><input type="number" name="qrcode.width" value="30"></li>
+                    <li><label>边框：</label><input type="checkbox" name="qrcode.border" value="1"></li>
+                </ul>
+            </li>
+            <li class="hide">
+                <ul>
+                    <li><label>X：</label><input type="number" name="underline.x" value=""></li>
+                    <li><label>Y：</label><input type="number" name="underline.y" value=""></li>
+                    <li><label>宽度：</label><input type="number" name="underline.width" value="10"></li>
+                </ul>
+            </li>
+        </ul>
+    </form>
+    <textarea id="html"></textarea>
+    <textarea id="output"></textarea>
+    
+    <script src='js/jquery.min.js'></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
