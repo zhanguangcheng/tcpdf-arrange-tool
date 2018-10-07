@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>TCPDP排版工具</title>
+    <title>TCPDF排版工具</title>
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
@@ -60,12 +60,12 @@
                     <li><label>高度：</label><input type="number" name="cell.height" value="7"></li>
                     <li><label>字体大小：</label><input type="number" name="cell.font.size" value="10"></li>
                     <li><label>文本：</label><textarea name="cell.text">Text</textarea></li>
-                    <li>
+                    <li style="position:relative;">
                         <label>边框：</label>
-                        <input type="checkbox" name="cell.border.left" value="1" style="position:relative;left:0px;" checked>
-                        <input type="checkbox" name="cell.border.top" value="1" style="position:relative;left:-10px;top:-7px;" checked>
-                        <input type="checkbox" name="cell.border.right" value="1" style="position:relative;left:-20px;">
-                        <input type="checkbox" name="cell.border.bottom" value="1"style="position:relative;top:7px;left:-57px;">
+                        <input type="checkbox" name="cell.border.left" value="1" style="position:absolute;left: 32px;" checked>
+                        <input type="checkbox" name="cell.border.top" value="1" style="position:absolute;left: 45px;top:-7px;" checked>
+                        <input type="checkbox" name="cell.border.right" value="1" style="position:absolute;left: 59px;">
+                        <input type="checkbox" name="cell.border.bottom" value="1" style="position:absolute;top:7px;left: 45px;">
                     </li>
                     <li>
                         <label>水平对齐方式：</label>

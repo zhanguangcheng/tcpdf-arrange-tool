@@ -175,7 +175,7 @@
                 element.style.top = opt['qrcode.y'] + 'mm';
                 element.style.width = opt['qrcode.width'] + 'mm';
                 element.style.height = opt['qrcode.width'] + 'mm';
-                element.style.lineHeight = opt['qrcode.height'] + 'mm';
+                element.style.lineHeight = opt['qrcode.width'] + 'mm';
                 element.dataset.text = opt['qrcode.text'];
                 element.dataset.border = opt['qrcode.border'] ? '1' : '';
             },
@@ -390,9 +390,23 @@
     });
 
     $html.on('change', function() {
-        $container.html($html.val());
+        var html = $html.val();
+        try {
+            global = JSON.parse(getSnippet(html, 'global'));
+        } catch {
+        }
+        $container.html(getSnippet(html, 'items'));
         $output.val(getPHPCode());
+        setConfig('global.title', global.title);
+        setConfig('global.creator', global.creator);
+        setConfig('global.author', global.author);
+        setConfig('global.font.family', global.fontFamily);
+        setConfig('global.paper.size', global.paper);
     });
+    
+    function getSnippet(string, flag) {
+        return string.substring(string.indexOf(flag + '@start')+(flag+'@start').length, string.indexOf(flag + '@end'));
+    }
     
     // px转mm, type:x|y
     var pxToMm = function () {
@@ -452,7 +466,10 @@
     }
 
     function build() {
-        $html.val($container.html());
+        $html.val(render('global@start{global}global@end items@start{items}items@end', {
+            global: JSON.stringify(global),
+            items: $container.html()
+        }));
         $output.val(getPHPCode());
     }
 
