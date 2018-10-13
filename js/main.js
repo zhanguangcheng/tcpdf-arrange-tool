@@ -1,25 +1,9 @@
-/**
- * 获取类型
- * 获取对应类型的配置
- * 创建/放置物体
- * 修改配置改变物体, 物体保存配置信息
- * 全局配置: 标题,字体,纸张大小
- * 生成配置/结果
- * 变量
- * 其他组件:二维码,下划线
- * 文本加粗,倾斜
- * 栅格线
- * 元素拖拽/键盘移动
- * 换行问题
- * 双击删除/delete
- * 使用说明
- */
 (function() {
     // 当前类型
     var type = 'global';
     // 当前选中元素
     var current = null;
-    var isMove = false;
+    var phpVariables = [];
     var global = {
         creator: 'Creator',
         author: 'Author',
@@ -80,6 +64,7 @@
                 div.style.height = opt['cell.height'] + 'mm';
                 div.style.display = 'flex';
                 div.style.alignItems = 'center';
+                div.style.justifyContent = opt['cell.align'];
                 div.style.fontSize = opt['cell.font.size'] + 'pt';
                 div.style.textAlign = opt['cell.align'];
                 div.innerHTML = lnToBr(opt['cell.text']);
@@ -110,7 +95,7 @@
                 $('[name="cell.border.top"]').prop('checked', !!element.style.borderTop);
                 $('[name="cell.border.right"]').prop('checked', !!element.style.borderRight);
                 $('[name="cell.border.bottom"]').prop('checked', !!element.style.borderBottom);
-                $($('[name="cell.align"]').get({left:0,center:1,right:2}[element.style.textAlign])).prop('checked', true);
+                $($('[name="cell.align"]').get({'flex-start':0,'center':1,'flex-end':2}[element.style.justifyContent])).prop('checked', true);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -119,7 +104,7 @@
                 element.style.width = opt['cell.width'] + 'mm';
                 element.style.height = opt['cell.height'] + 'mm';
                 element.style.fontSize = opt['cell.font.size'] + 'pt';
-                element.style.textAlign = opt['cell.align'];
+                element.style.justifyContent = opt['cell.align'];
                 element.innerHTML = lnToBr(opt['cell.text']);
                 element.style.borderLeft = opt['cell.border.left'] ? '1px solid #000' : '';
                 element.style.borderTop = opt['cell.border.top'] ? '1px solid #000' : '';
@@ -132,7 +117,7 @@
                 border += element.style.borderTop ? 'T' : '';
                 border += element.style.borderRight ? 'R' : '';
                 border += element.style.borderBottom ? 'B' : '';
-                align = { left: 'L', center: 'C', right: 'R' }[element.style.textAlign];
+                align = { 'flex-start': 'L', 'center': 'C', 'flex-end': 'R' }[element.style.justifyContent];
                 return render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', false, 1, {x}, {y}, true, 0, false, true, {height}, 'M');", {
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.height),
@@ -224,13 +209,6 @@
         },
     }
 
-    function lnToBr(text) {
-        return text.replace(/\r\n/g, '<br>');
-    }
-    function brToLn(text, real) {
-        return text.replace(/<br>/g, real ? '\r\n' : '\\r\\n');
-    }
-
     // 禁止右键菜单
     document.body.oncontextmenu = function() {
         return false;
@@ -251,6 +229,7 @@
     $container.on('click', function(event) {
         var opt = getConfig();
         current = null;
+        
         $('.active').removeClass('active');
         if ($(event.target).hasClass('item')) {
             $(event.target).addClass('active');
@@ -261,8 +240,10 @@
         if (type === 'global') {
             return true;
         }
+        
         opt[type + '.x'] = parseInt(pxToMm(event.offsetX, 'x'));
         opt[type + '.y'] = parseInt(pxToMm(event.offsetY, 'y'));
+
         var div = actions[type].create(opt);
         $(div).addClass('active');
         current = div;
@@ -277,11 +258,6 @@
             current = null;
             $('.active').removeClass('active');
         }
-    });
-
-    // 双击删除元素
-    $container.on('dblclick', function() {
-        remove(current);
     });
 
     // 拖拽移动元素
@@ -300,17 +276,17 @@
             t = this.offsetTop;
             element = this;
         });
-        $(window).on('mousemove', function (e) {
+        $(document).on('mousemove', function (e) {
             if (isMouseDown) {
                 var nx = e.pageX;
                 var ny = e.pageY;
                 var nl = nx - (x - l);
                 var nt = ny - (y - t);
-                element.style.left = parseInt(pxToMm(nl, 'x')) + 'mm';
-                element.style.top = parseInt(pxToMm(nt, 'y')) + 'mm';
+                element.style.left = Math.ceil(pxToMm(nl, 'x')) + 'mm';
+                element.style.top = Math.ceil(pxToMm(nt, 'y')) + 'mm';
             }
         });
-        $(window).on('mouseup', function () {
+        $(document).on('mouseup', function () {
             if (isMouseDown) {
                 isMouseDown = false;
                 build();
@@ -318,7 +294,6 @@
         });
     }());
     
-
     // 键盘移动元素
     $(document).on('keydown', function(event) {
         if (event.target !== document.body) {
@@ -403,7 +378,15 @@
         setConfig('global.font.family', global.fontFamily);
         setConfig('global.paper.size', global.paper);
     });
-    
+
+    function lnToBr(text) {
+        return text.replace(/\r\n/g, '<br>');
+    }
+
+    function brToLn(text, real) {
+        return text.replace(/<br>/g, real ? '\r\n' : '\\r\\n');
+    }
+
     function getSnippet(string, flag) {
         return string.substring(string.indexOf(flag + '@start')+(flag+'@start').length, string.indexOf(flag + '@end'));
     }
@@ -434,6 +417,7 @@
     // 预处理一下文本,可能包含变量
     function prepareText(text) {
         if (text.substr(0, 1) === '$') {
+            phpVariables.push(text.substr(1));
             return "$data['page1']['" + text.substr(1) + "']";
         }
         return '\"' + text + '\"';
@@ -499,6 +483,7 @@
             "$pdf->SetMargins(0, 0, 0);",
             "$pdf->setCellPaddings(0, 0, 0, 0);",
             "$pdf->setCellMargins(0, 0, 0, 0);",
+            "$pdf->SetAutoPageBreak(false);",
         ];
 
         code.push(render("$pdf->SetCreator('{creator}');", { creator: global.creator}));
@@ -519,7 +504,16 @@
         }
 
         code.push(render("$pdf->Output('{title}.pdf', 'I');", { title: global.title }));
-        return code.join("\n");
+        var variables = [];
+        if (phpVariables.length) {
+            variables.push("$data['page1'] = array(");
+            for (var i = 0; i < phpVariables.length; i++) {
+                variables.push("    '" + phpVariables[i] + "' => '',");
+            }
+            variables.push(");\n");
+        }
+        phpVariables = [];
+        return variables.join("\n") + code.join("\n");
     }
 
     // 获取配置

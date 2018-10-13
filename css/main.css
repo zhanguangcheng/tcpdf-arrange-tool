@@ -4,7 +4,7 @@
 body {
     margin:0;padding:0;background:#525659;font-size:12px;user-select: none;-webkit-user-select: none;
 }
-ul,li{
+ul{
     list-style:none;margin:0;padding:0
 }
 .hide {
@@ -24,7 +24,7 @@ ul,li{
     width: 210mm;height:297mm;margin: 5mm auto;background-color:#fff;position:relative;overflow:hidden;
 }
 #container .item {
-    position:absolute;
+    position:absolute;white-space: nowrap;overflow: hidden;
 }
 #tool-bar-title {
     position:fixed;top:15mm;background:#fff;padding:5px;margin:0px;
@@ -32,18 +32,27 @@ ul,li{
 #tool-bar-title li {
     border-bottom:1px solid #aaa;margin:4px;
 }
-#tool-bar-content {
+#form {
     position:fixed;top:65mm;background:#fff;padding:5px;margin:0px;
 }
 #tool-bar-content li {
     border-bottom:1px solid #aaa;margin:4px;
 }
+.html {
+    position:fixed;right:0;top:15mm;background:#fff;
+}
 #html {
-    position:fixed;right:0;top:15mm;width:50mm;height:30mm;
+    width:50mm;height:30mm;
+}
+.output {
+    position:fixed;right:0;top:60mm;background:#fff;
 }
 #output {
-    position:fixed;right:0;top:55mm;width:50mm;height:30mm;
+    width:50mm;height:30mm;
 }
 .qrcode {
     border:1px solid #aaa;background:#abcdef;
+}
+#help {
+    position:fixed;right:0;top:105mm;background:#fff;
 }
