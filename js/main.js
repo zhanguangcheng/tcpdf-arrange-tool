@@ -152,7 +152,7 @@
                 $('[name="qrcode.width"]').val(parseInt(element.style.width));
                 $('[name="qrcode.height"]').val(parseInt(element.style.width));
                 $('[name="qrcode.text"]').val(element.dataset.text);
-                $('[name="qrcode.order"]').prop('checked', !!element.dataset.order);
+                $('[name="qrcode.border"]').prop('checked', !!element.dataset.border);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -377,6 +377,7 @@
         setConfig('global.author', global.author);
         setConfig('global.font.family', global.fontFamily);
         setConfig('global.paper.size', global.paper);
+        $form.find('select').trigger('change');
     });
 
     function lnToBr(text) {
