@@ -80,6 +80,7 @@
                 if (opt['cell.border.bottom']) {
                     div.style.borderBottom = '1px solid #000';
                 }
+                div.dataset.fit = opt['cell.fit'] ? '1' : '';
                 div.dataset.type = 'cell';
                 return div;
             },
@@ -96,6 +97,7 @@
                 $('[name="cell.border.right"]').prop('checked', !!element.style.borderRight);
                 $('[name="cell.border.bottom"]').prop('checked', !!element.style.borderBottom);
                 $($('[name="cell.align"]').get({'flex-start':0,'center':1,'flex-end':2}[element.style.justifyContent])).prop('checked', true);
+                $('[name="cell.fit"]').prop('checked', !!element.dataset.fit);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -110,6 +112,7 @@
                 element.style.borderTop = opt['cell.border.top'] ? '1px solid #000' : '';
                 element.style.borderRight = opt['cell.border.right'] ? '1px solid #000' : '';
                 element.style.borderBottom = opt['cell.border.bottom'] ? '1px solid #000' : '';
+                element.dataset.fit = opt['cell.fit'] ? '1' : '';
             },
             getCode: function (element) {
                 var border = align = '';
@@ -118,14 +121,15 @@
                 border += element.style.borderRight ? 'R' : '';
                 border += element.style.borderBottom ? 'B' : '';
                 align = { 'flex-start': 'L', 'center': 'C', 'flex-end': 'R' }[element.style.justifyContent];
-                return render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', false, 1, {x}, {y}, true, 0, false, true, {height}, 'M');", {
+                return render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', false, 1, {x}, {y}, true, 0, false, true, {height}, 'M', {fit});", {
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.height),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     border: border,
                     align: align,
-                    text: prepareText(brToLn(element.innerHTML))
+                    text: prepareText(brToLn(element.innerHTML)),
+                    fit: element.dataset.fit ? 'true' : 'false'
                 });
             }
         },
