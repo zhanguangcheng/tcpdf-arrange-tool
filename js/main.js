@@ -540,8 +540,9 @@
 
     var getPaperSize = function () {
         var maps = {
-            'A3-L': { width: 420, height: 297 },
+            A3L: { width: 420, height: 297 },
             A3: { width: 297, height: 420 },
+            A4L: { width: 297, height: 210 },
             A4: { width: 210, height: 297 },
             A5: { width: 148, height: 210 },
             B4: { width: 250, height: 353 },
