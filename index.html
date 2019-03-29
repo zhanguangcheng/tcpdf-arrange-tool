@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TCPDF排版工具</title>
-    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/main.css?v=20190329">
 </head>
 <body>
     <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*297</h2>
     <div id="container" style="font-family:仿宋;"></div>
-    <div id="tool-bar-title">
+    <div id="tool-bar-title" class="droppable">
         <p>元素类型</p>
         <ul>
             <li><label><input type="radio" name="tool" value="global" checked>全局配置</label></li>
@@ -20,7 +20,7 @@
             <li><label><input type="radio" name="tool" value="underline">下划线</label></li>
         </ul>
     </div>
-    <form id="form">
+    <form id="form" class="droppable">
         <p>元素属性</p>
         <ul id="tool-bar-content">
             <li class="type-global">
@@ -81,7 +81,7 @@
                     </li>
                     <li>
                         <label>宽度/字体自适应：</label>
-                        <input type="checkbox" name="cell.fit" value="1">
+                        <input type="checkbox" name="cell.fit" value="1" checked>
                     </li>
                 </ul>
             </li>
@@ -122,6 +122,6 @@
         </ol>
     </div>
     <script src='js/jquery.min.js'></script>
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=20190329"></script>
 </body>
 </html>

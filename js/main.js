@@ -272,7 +272,7 @@
         var t = 0;
         var isMouseDown = false;
         var element = null;
-        $container.on('mousedown', '.item', function(e) {
+        $(document).on('mousedown', '.item,.droppable', function(e) {
             isMouseDown = true;
             x = e.pageX;
             y = e.pageY;
