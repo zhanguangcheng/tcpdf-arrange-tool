@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TCPDF排版工具</title>
-    <link rel="stylesheet" href="css/main.css?v=20190329">
+    <link rel="stylesheet" href="css/main.css?v=20190331">
 </head>
 <body>
     <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*297</h2>
     <div id="container" style="font-family:仿宋;"></div>
-    <div id="tool-bar-title" class="droppable">
-        <p>元素类型</p>
+    <div id="tool-bar-title" class="block droppable">
+        <p class="title">元素类型</p>
         <ul>
             <li><label><input type="radio" name="tool" value="global" checked>全局配置</label></li>
             <li><label><input type="radio" name="tool" value="text">文本</label></li>
@@ -20,8 +20,8 @@
             <li><label><input type="radio" name="tool" value="underline">下划线</label></li>
         </ul>
     </div>
-    <form id="form" class="droppable">
-        <p>元素属性</p>
+    <form id="form" class="block droppable">
+        <p class="title">元素属性</p>
         <ul id="tool-bar-content">
             <li class="type-global">
                 <ul>
@@ -103,16 +103,16 @@
             </li>
         </ul>
     </form>
-    <div class="html">
-        <p>排版源码</p>
+    <div class="block html droppable">
+        <p class="title">排版源码</p>
         <textarea id="html"></textarea>
     </div>
-    <div class="output">
-        <p>生成的PHP代码</p>
+    <div class="block output droppable">
+        <p class="title">生成的PHP代码</p>
         <textarea id="output"></textarea>
     </div>
-    <div id="help">
-        <p>使用小提示</p>
+    <div id="help" class="block droppable">
+        <p class="title">使用小提示</p>
         <ol>
             <li>选择合适的元素类型，点击空白处新增元素</li>
             <li>按Delete键删除元素</li>
@@ -122,6 +122,6 @@
         </ol>
     </div>
     <script src='js/jquery.min.js'></script>
-    <script src="js/main.js?v=20190329"></script>
+    <script src="js/main.js?v=20190331"></script>
 </body>
 </html>

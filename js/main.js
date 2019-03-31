@@ -230,7 +230,8 @@
     });
 
     // 画布点击,绘制元素,标记当前元素
-    $container.on('click', function(event) {
+    $container.on('mousedown', function(event) {
+        if (event.button !== 0) return;
         var opt = getConfig();
         current = null;
         
@@ -272,13 +273,29 @@
         var t = 0;
         var isMouseDown = false;
         var element = null;
+        var type = 'move';
+        var width = height = 0;
         $(document).on('mousedown', '.item,.droppable', function(e) {
-            isMouseDown = true;
-            x = e.pageX;
-            y = e.pageY;
-            l = this.offsetLeft;
-            t = this.offsetTop;
-            element = this;
+            if ($(e.target).hasClass('item') || $(e.target).hasClass('title')) {
+                isMouseDown = true;
+                x = e.pageX;
+                y = e.pageY;
+                l = this.offsetLeft;
+                t = this.offsetTop;
+                width = parseInt(e.target.style.width);
+                height = parseInt(e.target.style.height);
+                
+                if (e.target.dataset.type === 'cell') {
+                    type = 'move';
+                    if (Math.ceil(pxToMm(e.offsetX + 5, 'x')) >= width) {
+                        type = 'col-resize';
+                    } else if (Math.ceil(pxToMm(e.offsetY + 5, 'y')) >= height) {
+                        type = 'row-resize';
+                    }
+                }
+                
+                element = this;
+            }
         });
         $(document).on('mousemove', function (e) {
             if (isMouseDown) {
@@ -286,8 +303,18 @@
                 var ny = e.pageY;
                 var nl = nx - (x - l);
                 var nt = ny - (y - t);
-                element.style.left = Math.ceil(pxToMm(nl, 'x')) + 'mm';
-                element.style.top = Math.ceil(pxToMm(nt, 'y')) + 'mm';
+                switch (type) {
+                    case 'col-resize':
+                        element.style.width = width + Math.ceil(pxToMm(nx-x, 'x')) + 'mm';
+                        break;
+                    case 'row-resize':
+                        element.style.height = height + Math.ceil(pxToMm(ny-y, 'y')) + 'mm';
+                        break;
+                    default:
+                        element.style.left = Math.ceil(pxToMm(nl, 'x')) + 'mm';
+                        element.style.top = Math.ceil(pxToMm(nt, 'y')) + 'mm';
+                        break;
+                }
             }
         });
         $(document).on('mouseup', function () {
