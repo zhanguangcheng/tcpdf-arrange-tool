@@ -306,13 +306,17 @@
                 switch (type) {
                     case 'col-resize':
                         element.style.width = width + Math.ceil(pxToMm(nx-x, 'x')) + 'mm';
+                        setConfig(e.target.dataset.type + '.width', parseInt(element.style.width));
                         break;
                     case 'row-resize':
                         element.style.height = height + Math.ceil(pxToMm(ny-y, 'y')) + 'mm';
+                        setConfig(e.target.dataset.type + '.height', parseInt(element.style.height));
                         break;
                     default:
                         element.style.left = Math.ceil(pxToMm(nl, 'x')) + 'mm';
                         element.style.top = Math.ceil(pxToMm(nt, 'y')) + 'mm';
+                        setConfig(e.target.dataset.type + '.x', parseInt(element.style.left));
+                        setConfig(e.target.dataset.type + '.y', parseInt(element.style.top));
                         break;
                 }
             }
