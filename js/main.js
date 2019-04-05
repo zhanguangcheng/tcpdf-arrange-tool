@@ -284,9 +284,9 @@
                 t = this.offsetTop;
                 width = parseInt(e.target.style.width);
                 height = parseInt(e.target.style.height);
+                type = 'move';
                 
                 if (e.target.dataset.type === 'cell') {
-                    type = 'move';
                     if (Math.ceil(pxToMm(e.offsetX + 5, 'x')) >= width) {
                         type = 'col-resize';
                     } else if (Math.ceil(pxToMm(e.offsetY + 5, 'y')) >= height) {
