@@ -5,11 +5,28 @@
     var current = null;
     var phpVariables = [];
     var global = {
-        creator: 'Creator',
-        author: 'Author',
+        creator: 'CLF',
+        author: 'Grass',
         title: 'Title',
         fontFamily: 'simfang',
         paper: 'A4'
+    };
+
+    // 字体列表
+    var fontFamily = {
+        simfang:"仿宋",
+        simhei:"黑体",
+        simkai:"楷体",
+        msungstdlight:"Sung",
+    };
+
+    var runtime = {
+        fontFamily: global.fontFamily,
+        fontSize: null,
+        fontStyleB: false,
+        fontStyleI: false,
+        fontStyleU: false,
+        background: '#ffffff',
     };
 
     var $form = $('#form');
@@ -22,15 +39,20 @@
 
     var actions = {
         text: {
-            create: function (options) {
-                var div = document.createElement('div');
-                div.className = 'item';
-                div.style.left = options['text.x'] + 'mm';
-                div.style.top = options['text.y'] + 'mm';
-                div.style.fontSize = options['text.font.size'] + 'pt';
-                div.innerHTML = options['text.text'];
-                div.dataset.type = 'text';
-                return div;
+            create: function (opt) {
+                var element = document.createElement('div');
+                element.className = 'item';
+                element.dataset.type = 'text';
+                element.style.left = opt['text.x'] + 'mm';
+                element.style.top = opt['text.y'] + 'mm';
+                element.style.fontSize = opt['text.font.size'] + 'pt';
+                element.innerHTML = opt['text.text'];
+                element.style.fontFamily = fontFamily[opt['text.font.family']] || '';
+                element.dataset.fontFamily = opt['text.font.family'] || '';
+                element.style.fontWeight = opt['text.font.style.b'] ? 'bold' : 'normal';
+                element.style.fontStyle = opt['text.font.style.i'] ? 'italic' : 'normal';
+                element.style.textDecoration = opt['text.font.style.u'] ? 'underline' : 'none';
+                return element;
             },
             loadConfig: function (element) {
                 $('[value=text').prop('checked', true).change();
@@ -38,51 +60,70 @@
                 $('[name="text.y"]').val(parseInt(element.style.top));
                 $('[name="text.font.size"]').val(parseInt(element.style.fontSize));
                 $('[name="text.text"]').val(element.innerHTML);
+                $('[name="text.font.family"]').val(element.dataset.fontFamily || '');
+                $('[name="text.font.style.b"]').prop('checked', element.style.fontWeight === 'bold');
+                $('[name="text.font.style.i"]').prop('checked', element.style.fontStyle === 'italic');
+                $('[name="text.font.style.u"]').prop('checked', element.style.textDecoration === 'underline');
+                $('[name="text.var"]').val(element.dataset.var);
             },
             update: function (element) {
-                var options = getConfig();
-                element.style.left = options['text.x'] + 'mm';
-                element.style.top = options['text.y'] + 'mm';
-                element.style.fontSize = options['text.font.size'] + 'pt';
-                element.innerHTML = options['text.text'];
+                var opt = getConfig();
+                element.style.left = opt['text.x'] + 'mm';
+                element.style.top = opt['text.y'] + 'mm';
+                element.style.fontSize = opt['text.font.size'] + 'pt';
+                element.style.fontFamily = fontFamily[opt['text.font.family']] || '';
+                element.dataset.fontFamily = opt['text.font.family'] || '';
+                element.style.fontWeight = opt['text.font.style.b'] ? 'bold' : 'normal';
+                element.style.fontStyle = opt['text.font.style.i'] ? 'italic' : 'normal';
+                element.style.textDecoration = opt['text.font.style.u'] ? 'underline' : 'none';
+                element.innerHTML = opt['text.text'];
+                element.dataset.var = opt['text.var'];
             },
             getCode: function (element) {
-                return render("$pdf->Text({x}, {y}, {text});", {
+                var obj = actions.pushVariable(element);
+                return actions.getPrepareCode(element) + render("$pdf->Text({x}, {y}, {text});", {
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
-                    text: prepareText(element.innerHTML)
+                    text: actions.getVariableCode(obj)
                 });
             }
         },
         cell: {
             create: function (opt) {
-                var div = document.createElement('div');
-                div.className = 'item';
-                div.style.left = opt['cell.x'] + 'mm';
-                div.style.top = opt['cell.y'] + 'mm';
-                div.style.width = opt['cell.width'] + 'mm';
-                div.style.height = opt['cell.height'] + 'mm';
-                div.style.display = 'flex';
-                div.style.alignItems = 'center';
-                div.style.justifyContent = opt['cell.align'];
-                div.style.fontSize = opt['cell.font.size'] + 'pt';
-                div.style.textAlign = opt['cell.align'];
-                div.innerHTML = lnToBr(opt['cell.text']);
+                var element = document.createElement('div');
+                element.className = 'item';
+                element.dataset.type = 'cell';
+                element.style.left = opt['cell.x'] + 'mm';
+                element.style.top = opt['cell.y'] + 'mm';
+                element.style.width = opt['cell.width'] + 'mm';
+                element.style.height = opt['cell.height'] + 'mm';
+                element.style.display = 'flex';
+                element.style.alignItems = 'center';
+                element.style.justifyContent = opt['cell.align'];
+                element.style.fontSize = opt['cell.font.size'] + 'pt';
+                element.style.textAlign = opt['cell.align'];
+                element.innerHTML = lnToBr(opt['cell.text']);
                 if (opt['cell.border.left']) {
-                    div.style.borderLeft = '1px solid #000';
+                    element.style.borderLeft = '1px solid #000';
                 }
                 if (opt['cell.border.top']) {
-                    div.style.borderTop = '1px solid #000';
+                    element.style.borderTop = '1px solid #000';
                 }
                 if (opt['cell.border.right']) {
-                    div.style.borderRight = '1px solid #000';
+                    element.style.borderRight = '1px solid #000';
                 }
                 if (opt['cell.border.bottom']) {
-                    div.style.borderBottom = '1px solid #000';
+                    element.style.borderBottom = '1px solid #000';
                 }
-                div.dataset.fit = opt['cell.fit'] ? '1' : '';
-                div.dataset.type = 'cell';
-                return div;
+                element.dataset.fit = opt['cell.fit'] ? '1' : '';
+                element.style.fontFamily = fontFamily[opt['cell.font.family']] || '';
+                element.dataset.fontFamily = opt['cell.font.family'] || '';
+                element.style.fontWeight = opt['cell.font.style.b'] ? 'bold' : 'normal';
+                element.style.fontStyle = opt['cell.font.style.i'] ? 'italic' : 'normal';
+                element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
+                element.style.background = opt['cell.background'];
+                element.dataset.background = opt['cell.background'];
+                return element;
             },
             loadConfig: function (element) {
                 $('[value=cell').prop('checked', true).change();
@@ -98,6 +139,12 @@
                 $('[name="cell.border.bottom"]').prop('checked', !!element.style.borderBottom);
                 $($('[name="cell.align"]').get({'flex-start':0,'center':1,'flex-end':2}[element.style.justifyContent])).prop('checked', true);
                 $('[name="cell.fit"]').prop('checked', !!element.dataset.fit);
+                $('[name="cell.font.family"]').val(element.dataset.fontFamily || '');
+                $('[name="cell.font.style.b"]').prop('checked', element.style.fontWeight === 'bold');
+                $('[name="cell.font.style.i"]').prop('checked', element.style.fontStyle === 'italic');
+                $('[name="cell.font.style.u"]').prop('checked', element.style.textDecoration === 'underline');
+                $('[name="cell.var"]').val(element.dataset.var);
+                $('[name="cell.background"]').val(element.dataset.background);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -113,41 +160,49 @@
                 element.style.borderRight = opt['cell.border.right'] ? '1px solid #000' : '';
                 element.style.borderBottom = opt['cell.border.bottom'] ? '1px solid #000' : '';
                 element.dataset.fit = opt['cell.fit'] ? '1' : '';
+                element.style.fontFamily = fontFamily[opt['cell.font.family']] || '';
+                element.dataset.fontFamily = opt['cell.font.family'] || '';
+                element.style.fontWeight = opt['cell.font.style.b'] ? 'bold' : 'normal';
+                element.style.fontStyle = opt['cell.font.style.i'] ? 'italic' : 'normal';
+                element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
+                element.dataset.var = opt['cell.var'];
+                element.style.background = opt['cell.background'];
+                element.dataset.background = opt['cell.background'];
             },
             getCode: function (element) {
+                var obj = actions.pushVariable(element);
                 var border = align = '';
                 border += element.style.borderLeft ? 'L' : '';
                 border += element.style.borderTop ? 'T' : '';
                 border += element.style.borderRight ? 'R' : '';
                 border += element.style.borderBottom ? 'B' : '';
                 align = { 'flex-start': 'L', 'center': 'C', 'flex-end': 'R' }[element.style.justifyContent];
-                return render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', false, 1, {x}, {y}, true, 0, false, true, {height}, 'M', {fit});", {
+                return actions.getPrepareCode(element) + render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', {fill}, 1, {x}, {y}, true, 0, false, true, {height}, 'M', {fit});", {
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.height),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     border: border,
                     align: align,
-                    text: prepareText(brToLn(element.innerHTML)),
+                    fill: element.dataset.background === '#ffffff' ? 'false' : 'true',
+                    text: actions.getVariableCode(obj),
                     fit: element.dataset.fit ? 'true' : 'false'
                 });
             }
         },
         qrcode: {
             create: function (opt) {
-                var div = document.createElement('div');
-                div.className = 'item qrcode';
-                div.style.left = opt['qrcode.x'] + 'mm';
-                div.style.top = opt['qrcode.y'] + 'mm';
-                div.style.width = opt['qrcode.width'] + 'mm';
-                div.style.height = opt['qrcode.width'] + 'mm';
-                div.style.lineHeight = opt['qrcode.width'] + 'mm';
-                div.style.textAlign = 'center';
-                div.innerHTML = '二维码';
-                div.dataset.type = 'qrcode';
-                div.dataset.text = opt['qrcode.text'];
-                div.dataset.border = opt['qrcode.border'] ? '1' : '';
-                return div;
+                var element = document.createElement('div');
+                element.className = 'item qrcode';
+                element.dataset.type = 'qrcode';
+                element.style.left = opt['qrcode.x'] + 'mm';
+                element.style.top = opt['qrcode.y'] + 'mm';
+                element.style.width = opt['qrcode.width'] + 'mm';
+                element.style.height = opt['qrcode.width'] + 'mm';
+                element.innerHTML = '二维码';
+                element.dataset.text = opt['qrcode.text'];
+                element.dataset.border = opt['qrcode.border'] ? '1' : '';
+                return element;
             },
             loadConfig: function (element) {
                 $('[value=qrcode').prop('checked', true).change();
@@ -157,6 +212,7 @@
                 $('[name="qrcode.height"]').val(parseInt(element.style.width));
                 $('[name="qrcode.text"]').val(element.dataset.text);
                 $('[name="qrcode.border"]').prop('checked', !!element.dataset.border);
+                $('[name="qrcode.var"]').val(element.dataset.var);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -164,13 +220,15 @@
                 element.style.top = opt['qrcode.y'] + 'mm';
                 element.style.width = opt['qrcode.width'] + 'mm';
                 element.style.height = opt['qrcode.width'] + 'mm';
-                element.style.lineHeight = opt['qrcode.width'] + 'mm';
+                // element.style.lineHeight = opt['qrcode.width'] + 'mm';
                 element.dataset.text = opt['qrcode.text'];
                 element.dataset.border = opt['qrcode.border'] ? '1' : '';
+                element.dataset.var = opt['qrcode.var'];
             },
             getCode: function (element) {
+                var obj = actions.pushVariable(element, element.dataset.text);
                 return render("$pdf->write2DBarcode({text},'QRCODE', {x}, {y}, {width}, {height}, array('padding'=>'auto','border'=>{border}));", {
-                    text: prepareText(element.dataset.text),
+                    text: actions.getVariableCode(obj),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     width: parseInt(element.style.width),
@@ -179,16 +237,106 @@
                 });
             }
         },
+        barcode: {
+            create: function (opt) {
+                var element = document.createElement('div');
+                element.className = 'item barcode';
+                element.dataset.type = 'barcode';
+                element.style.left = opt['barcode.x'] + 'mm';
+                element.style.top = opt['barcode.y'] + 'mm';
+                element.style.width = opt['barcode.text'].length * opt['barcode.xres'] * 19 + 'mm';
+                element.style.height = opt['barcode.height'] + 'mm';
+                element.innerHTML = '条形码';
+                element.dataset.text = opt['barcode.text'];
+                element.dataset.mode = opt['barcode.mode'];
+                element.dataset.xres = opt['barcode.xres'];
+                return element;
+            },
+            loadConfig: function (element) {
+                $('[value=barcode').prop('checked', true).change();
+                $('[name="barcode.x"]').val(parseInt(element.style.left));
+                $('[name="barcode.y"]').val(parseInt(element.style.top));
+                $('[name="barcode.height"]').val(parseInt(element.style.height));
+                $('[name="barcode.text"]').val(element.dataset.text);
+                $('[name="barcode.mode"]').val(element.dataset.mode);
+                $('[name="barcode.xres"]').val(element.dataset.xres);
+                $('[name="barcode.var"]').val(element.dataset.var);
+            },
+            update: function (element) {
+                var opt = getConfig();
+                element.style.left = opt['barcode.x'] + 'mm';
+                element.style.top = opt['barcode.y'] + 'mm';
+                element.style.width = opt['barcode.text'].length * opt['barcode.xres'] * 19 + 'mm';
+                element.style.height = opt['barcode.height'] + 'mm';
+                element.dataset.text = opt['barcode.text'];
+                element.dataset.mode = opt['barcode.mode'];
+                element.dataset.xres = opt['barcode.xres'];
+                element.dataset.var = opt['barcode.var'];
+            },
+            getCode: function (element) {
+                var obj = actions.pushVariable(element, element.dataset.text);
+                return render("$pdf->write1DBarcode({text}, '{type}', {x}, {y}, '', {h}, {xres});", {
+                    text: actions.getVariableCode(obj),
+                    type: element.dataset.mode,
+                    x: parseInt(element.style.left),
+                    y: parseInt(element.style.top),
+                    h: parseInt(element.style.height),
+                    xres: element.dataset.xres,
+                });
+            }
+        },
+        image: {
+            create: function (opt) {
+                var element = document.createElement('div');
+                element.className = 'item image';
+                element.dataset.type = 'image';
+                element.style.left = opt['image.x'] + 'mm';
+                element.style.top = opt['image.y'] + 'mm';
+                element.style.width = opt['image.width'] + 'mm';
+                element.style.height = opt['image.height'] + 'mm';
+                element.innerHTML = '图片';
+                element.dataset.url = opt['image.url'];
+                return element;
+            },
+            loadConfig: function (element) {
+                $('[value=image').prop('checked', true).change();
+                $('[name="image.x"]').val(parseInt(element.style.left));
+                $('[name="image.y"]').val(parseInt(element.style.top));
+                $('[name="image.width"]').val(parseInt(element.style.width));
+                $('[name="image.height"]').val(parseInt(element.style.height));
+                $('[name="image.url"]').val(element.dataset.url);
+                $('[name="image.var"]').val(element.dataset.var);
+            },
+            update: function (element) {
+                var opt = getConfig();
+                element.style.left = opt['image.x'] + 'mm';
+                element.style.top = opt['image.y'] + 'mm';
+                element.style.width = opt['image.width'] + 'mm';
+                element.style.height = opt['image.height'] + 'mm';
+                element.dataset.url = opt['image.url'];
+                element.dataset.var = opt['image.var'];
+            },
+            getCode: function (element) {
+                var obj = actions.pushVariable(element, element.dataset.url);
+                return render("$pdf->Image({file}, {x}, {y}, {w}, {h});", {
+                    file: actions.getVariableCode(obj),
+                    x: parseInt(element.style.left),
+                    y: parseInt(element.style.top),
+                    w: parseInt(element.style.width),
+                    h: parseInt(element.style.height),
+                });
+            }
+        },
         underline: {
             create: function (opt) {
-                var div = document.createElement('div');
-                div.className = 'item';
-                div.style.left = opt['underline.x'] + 'mm';
-                div.style.top = opt['underline.y'] + 'mm';
-                div.style.width = opt['underline.width'] + 'mm';
-                div.style.borderTop = '2px solid #000';
-                div.dataset.type = 'underline';
-                return div;
+                var element = document.createElement('div');
+                element.className = 'item';
+                element.dataset.type = 'underline';
+                element.style.left = opt['underline.x'] + 'mm';
+                element.style.top = opt['underline.y'] + 'mm';
+                element.style.width = opt['underline.width'] + 'mm';
+                element.style.borderTop = '2px solid #000';
+                return element;
             },
             loadConfig: function (element) {
                 $('[value=underline').prop('checked', true).change();
@@ -211,6 +359,66 @@
                 });
             }
         },
+        getPrepareCode: function (element) {
+            var code = [];
+
+            // 字体&样式
+            var isB = element.style.fontWeight === 'bold';
+            var isI = element.style.fontStyle === 'italic';
+            var isU = element.style.textDecoration === 'underline';
+            var family = element.dataset.fontFamily || runtime.fontFamily;
+            var background = element.dataset.background || runtime.background;
+            var style = (isB ? 'B' : '') + (isI ? 'I' : '') + (isU ? 'U' : '');
+            if (
+                family !== runtime.fontFamily
+                || isB !== runtime.fontStyleB
+                || isI !== runtime.fontStyleI
+                || isU !== runtime.fontStyleU
+            ) {
+                code.push(render("$pdf->SetFont(\"{family}\", \"{style}\");", {
+                    family: family,
+                    style: style
+                }));
+                runtime.fontFamily = family;
+                runtime.fontStyleB = isB;
+                runtime.fontStyleI = isI;
+                runtime.fontStyleU = isU;
+            }
+
+            // 字体大小
+            var fontSize = parseInt(element.style.fontSize);
+            if (fontSize !== runtime.fontSize) {
+                runtime.fontSize = fontSize
+                code.push(render('$pdf->SetFontSize({size});', { size: fontSize }));
+            }
+
+            // 背景颜色
+            if (background !== runtime.background) {
+                runtime.background = background;
+                code.push(render('$pdf->SetFillColor({r}, {g}, {b});', {
+                    r: parseInt(background.substr(1, 2), 16),
+                    g: parseInt(background.substr(3, 2), 16),
+                    b: parseInt(background.substr(5, 2), 16)
+                }));
+            }
+            return code.join("\n") + (code.length ? "\n" : '');
+        },
+        pushVariable: function (element, value) {
+            var variable = $.trim(element.dataset.var);
+            var obj = {
+                key: variable,
+                value: brToLn(value === undefined ? element.innerHTML : value)
+            };
+            if (variable) {
+                phpVariables.push(obj);
+            }
+            return obj;
+        },
+        getVariableCode: function(obj) {
+            return obj.key
+                ? "$data['page1']['" + obj.key + "']"
+                : '\"' + obj.value + '\"'
+        }
     }
 
     // 禁止右键菜单
@@ -286,7 +494,7 @@
                 height = parseInt(e.target.style.height);
                 type = 'move';
                 
-                if (e.target.dataset.type === 'cell') {
+                if (e.target.dataset.type === 'cell' || e.target.dataset.type === 'image') {
                     if (Math.ceil(pxToMm(e.offsetX + 5, 'x')) >= width) {
                         type = 'col-resize';
                     } else if (Math.ceil(pxToMm(e.offsetY + 5, 'y')) >= height) {
@@ -396,6 +604,12 @@
             build();
         } else if (current) {
             update(current);
+            if (this.name === 'text.font.family' || this.name === 'cell.font.family') {
+                // 特定的字体才有加粗和斜体功能
+                $(this).parent()
+                    .find('[name*="font.style.b"],[name*="font.style.i"]')
+                    .attr('disabled', this.value !== 'msungstdlight');
+            }
         }
     });
 
@@ -403,10 +617,9 @@
         var html = $html.val();
         try {
             global = JSON.parse(getSnippet(html, 'global'));
-        } catch {
+        } catch(err) {
         }
         $container.html(getSnippet(html, 'items'));
-        $output.val(getPHPCode());
         setConfig('global.title', global.title);
         setConfig('global.creator', global.creator);
         setConfig('global.author', global.author);
@@ -424,7 +637,7 @@
     }
 
     function getSnippet(string, flag) {
-        return string.substring(string.indexOf(flag + '@start')+(flag+'@start').length, string.indexOf(flag + '@end'));
+        return string.substring(string.indexOf(flag + '@start') + (flag + '@start').length, string.indexOf(flag + '@end'));
     }
     
     // px转mm, type:x|y
@@ -449,15 +662,6 @@
             return px * 25.3 / dpi[type];
         }
     }();
-
-    // 预处理一下文本,可能包含变量
-    function prepareText(text) {
-        if (text.substr(0, 1) === '$') {
-            phpVariables.push(text.substr(1));
-            return "$data['page1']['" + text.substr(1) + "']";
-        }
-        return '\"' + text + '\"';
-    }
 
     // 根据元素加载配置
     function loadConfig(element) {
@@ -491,6 +695,15 @@
             items: $container.html()
         }));
         $output.val(getPHPCode());
+        runtime = {
+            fontFamily: global.fontFamily,
+            fontSize: null,
+            fontStyleB: false,
+            fontStyleI: false,
+            fontStyleU: false,
+            fontStyleU: false,
+            background: '#ffffff',
+        };
     }
 
     function getPHPCode() {
@@ -513,7 +726,6 @@
             return 0;
         });
         var code = [
-            "$pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);",
             "$pdf->setPrintHeader(false);",
             "$pdf->setPrintFooter(false);",
             "$pdf->SetMargins(0, 0, 0);",
@@ -521,32 +733,33 @@
             "$pdf->setCellMargins(0, 0, 0, 0);",
             "$pdf->SetAutoPageBreak(false);",
         ];
-
+        var paper = {
+            orien: global.paper.substr(-1) == 'L' ? 'L' : 'P',
+            size: global.paper.substr(-1) == 'L' ? global.paper.substring(0, global.paper.indexOf('L')) : global.paper,
+        };
+        code.unshift(render("$pdf = new TCPDF('{orien}', 'mm', '{size}', true, 'UTF-8', false);", paper));
         code.push(render("$pdf->SetCreator('{creator}');", { creator: global.creator}));
         code.push(render("$pdf->SetAuthor('{author}');", { author: global.author}));
         code.push(render("$pdf->SetTitle('{title}');", {title: global.title}));
         code.push(render("$pdf->SetFont('{font}');", {font: global.fontFamily}));
-        code.push(render("$pdf->AddPage('', '{format}');", {format: global.paper}));
+        code.push(render("$pdf->AddPage('{orien}', '{size}');", paper));
 
-        var fontSize = '';
-        var itemFontSize = null;
         for (var i=0; i<data.length; i++) {
-            itemFontSize = parseInt(data[i].style.fontSize);
-            if (itemFontSize && fontSize !== itemFontSize) {
-                code.push(render('$pdf->SetFontSize({size});', {size: itemFontSize}));
-                fontSize = itemFontSize;
-            } 
             code.push(actions[data[i].dataset.type].getCode(data[i]));
         }
 
-        code.push(render("$pdf->Output('{title}.pdf', 'I');", { title: global.title }));
+        code.push("$pdf->Output();");
         var variables = [];
+        var pushedKey = [];
         if (phpVariables.length) {
             variables.push("$data['page1'] = array(");
             for (var i = 0; i < phpVariables.length; i++) {
-                variables.push("    '" + phpVariables[i] + "' => '',");
+                if ($.inArray(phpVariables[i].key, pushedKey) === -1) {
+                    pushedKey.push(phpVariables[i].key);
+                    variables.push("    '" + phpVariables[i].key + "' => \"" + phpVariables[i].value + "\",");
+                }
             }
-            variables.push(");\n");
+            variables.push(");\n\n");
         }
         phpVariables = [];
         return variables.join("\n") + code.join("\n");
@@ -575,8 +788,11 @@
             A3: { width: 297, height: 420 },
             A4L: { width: 297, height: 210 },
             A4: { width: 210, height: 297 },
+            A5L: { width: 210, height: 148 },
             A5: { width: 148, height: 210 },
+            B4L: { width: 353, height: 250 },
             B4: { width: 250, height: 353 },
+            B5L: { width: 250, height: 176 },
             B5: { width: 176, height: 250 },
         };
         return function(paper) {

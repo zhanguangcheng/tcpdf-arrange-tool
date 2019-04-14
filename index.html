@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TCPDF排版工具</title>
-    <link rel="stylesheet" href="css/main.css?v=20190331">
+    <link rel="stylesheet" href="css/main.css?v=20190414">
 </head>
 <body>
     <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*297</h2>
@@ -17,6 +17,8 @@
             <li><label><input type="radio" name="tool" value="text">文本</label></li>
             <li><label><input type="radio" name="tool" value="cell">单元格</label></li>
             <li><label><input type="radio" name="tool" value="qrcode">二维码</label></li>
+            <li><label><input type="radio" name="tool" value="barcode">条形码</label></li>
+            <li><label><input type="radio" name="tool" value="image">图片</label></li>
             <li><label><input type="radio" name="tool" value="underline">下划线</label></li>
         </ul>
     </div>
@@ -26,57 +28,91 @@
             <li class="type-global">
                 <ul>
                     <li><label>标题：</label><input type="text" name="global.title" value="Title"></li>
-                    <li><label>创建者：</label><input type="text" name="global.creator" value="Creator"></li>
-                    <li><label>作者：</label><input type="text" name="global.author" value="Author"></li>
+                    <li><label>单位：</label><input type="text" name="global.creator" value="CLF"></li>
+                    <li><label>作者：</label><input type="text" name="global.author" value="Grass"></li>
                     <li>
-                        <label>字体：</label>
+                        <label>默认字体：</label>
                         <select name="global.font.family">
                             <option value="simfang" selected>仿宋</option>
                             <option value="simhei">黑体</option>
                             <option value="simkai">楷体</option>
+                            <option value="msungstdlight">Sung</option>
                         </select>
                     </li>
                     <li>
                         <label>纸张大小：</label>
                         <select name="global.paper.size">
-                            <option value="A3L">A3L</option>
-                            <option value="A3">A3</option>
-                            <option value="A4L">A4L</option>
-                            <option value="A4" selected>A4</option>
-                            <option value="A5">A5</option>
-                            <option value="B4">B4</option>
-                            <option value="B5">B5</option>
+                            <option>A3L</option>
+                            <option>A3</option>
+                            <option>A4L</option>
+                            <option selected>A4</option>
+                            <option>A5L</option>
+                            <option>A5</option>
+                            <option>B4L</option>
+                            <option>B4</option>
+                            <option>B5L</option>
+                            <option>B5</option>
                         </select>
                     </li>
                 </ul>
             </li>
             <li class="type-text hide">
                 <ul>
-                    <li><label>X：</label><input type="number" name="text.x" value=""></li>
-                    <li><label>Y：</label><input type="number" name="text.y" value=""></li>
-                    <li><label>字体大小：</label><input type="number" name="text.font.size" value="10"></li>
+                    <li><label>顶部：</label><input type="number" name="text.x" value=""></li>
+                    <li><label>左边：</label><input type="number" name="text.y" value=""></li>
+                    <li class="font-block">
+                        <label>字体：</label><input type="number" name="text.font.size" value="10" class="width-50">
+                        <select name="text.font.family">
+                            <option value="">字体</option>
+                            <option value="simfang">仿宋</option>
+                            <option value="simhei">黑体</option>
+                            <option value="simkai">楷体</option>
+                            <option value="msungstdlight">Sung</option>
+                        </select>
+                        <label class="font-style" style="top: -4px;left: 152px;"><input type="checkbox" name="text.font.style.b" disabled>B</label>
+                        <label class="font-style" style="top: 10px;left: 152px;"><input type="checkbox" name="text.font.style.i" disabled>I</label>
+                        <label class="font-style" style="top: -4px;left: 175px;"><input type="checkbox" name="text.font.style.u">U</label>
+                    </li>
                     <li><label>文本：</label><input type="text" name="text.text" value="Text"></li>
+                    <li><label>变量：</label><input type="text" name="text.var"></li>
                 </ul>
             </li>
             <li class="type-cell hide">
                 <ul>
-                    <li><label>X：</label><input type="number" name="cell.x" value=""></li>
-                    <li><label>Y：</label><input type="number" name="cell.y" value=""></li>
+                    <li><label>顶部：</label><input type="number" name="cell.x" value=""></li>
+                    <li><label>左边：</label><input type="number" name="cell.y" value=""></li>
                     <li><label>宽度：</label><input type="number" name="cell.width" value="30"></li>
                     <li><label>高度：</label><input type="number" name="cell.height" value="7"></li>
-                    <li><label>字体大小：</label><input type="number" name="cell.font.size" value="10"></li>
-                    <li><label>文本：</label><textarea name="cell.text">Text</textarea></li>
+                    <li class="font-block">
+                        <label>字体：</label><input type="number" name="cell.font.size" value="10" class="width-50">
+                        <select name="cell.font.family">
+                            <option value="">字体</option>
+                            <option value="simfang">仿宋</option>
+                            <option value="simhei">黑体</option>
+                            <option value="simkai">楷体</option>
+                            <option value="msungstdlight">Sung</option>
+                        </select>
+                        <label class="font-style" style="top: -4px;left: 152px;"><input type="checkbox" name="cell.font.style.b" disabled>B</label>
+                        <label class="font-style" style="top: 10px;left: 152px;"><input type="checkbox" name="cell.font.style.i" disabled>I</label>
+                        <label class="font-style" style="top: -4px;left: 175px;"><input type="checkbox" name="cell.font.style.u">U</label>
+                    </li>
+                    <li><label style="vertical-align: top">文本：</label><textarea name="cell.text">Text</textarea></li>
+                    <li><label>变量：</label><input type="text" name="cell.var"></li>
                     <li style="position:relative;">
                         <label>边框：</label>
-                        <input type="checkbox" name="cell.border.left" value="1" style="position:absolute;left: 32px;" checked>
-                        <input type="checkbox" name="cell.border.top" value="1" style="position:absolute;left: 45px;top:-7px;" checked>
-                        <input type="checkbox" name="cell.border.right" value="1" style="position:absolute;left: 59px;">
-                        <input type="checkbox" name="cell.border.bottom" value="1" style="position:absolute;top:7px;left: 45px;">
+                        <input type="checkbox" name="cell.border.left" value="1" style="position:absolute;left: 36px;top: 4px;" checked>
+                        <input type="checkbox" name="cell.border.top" value="1" style="position:absolute;left: 49px;top: -3px;" checked>
+                        <input type="checkbox" name="cell.border.right" value="1" style="position:absolute;left: 62px;top: 4px;">
+                        <input type="checkbox" name="cell.border.bottom" value="1" style="position:absolute;top: 11px;left: 49px;">
+                    </li>
+                    <li>
+                        <label>背景颜色：</label>
+                        <input type="color" name="cell.background" value="#ffffff">
                     </li>
                     <li>
                         <label>水平对齐方式：</label>
-                        <label><input type="radio" name="cell.align" value="flex-start" checked>左</label>
-                        <label><input type="radio" name="cell.align" value="center">中</label>
+                        <label><input type="radio" name="cell.align" value="flex-start">左</label>
+                        <label><input type="radio" name="cell.align" value="center" checked>中</label>
                         <label><input type="radio" name="cell.align" value="flex-end">右</label>
                     </li>
                     <li>
@@ -85,19 +121,75 @@
                     </li>
                 </ul>
             </li>
-            <li class="hide">
+            <li class="type-qrcode hide">
                 <ul>
-                    <li><label>X：</label><input type="number" name="qrcode.x" value=""></li>
-                    <li><label>Y：</label><input type="number" name="qrcode.y" value=""></li>
+                    <li><label>顶部：</label><input type="number" name="qrcode.x" value=""></li>
+                    <li><label>左边：</label><input type="number" name="qrcode.y" value=""></li>
                     <li><label>文本：</label><input type="text" name="qrcode.text" value="Text"></li>
+                    <li><label>变量：</label><input type="text" name="qrcode.var"></li>
                     <li><label>宽高：</label><input type="number" name="qrcode.width" value="30"></li>
                     <li><label>边框：</label><input type="checkbox" name="qrcode.border" value="1"></li>
                 </ul>
             </li>
-            <li class="hide">
+            <li class="type-barcode hide">
                 <ul>
-                    <li><label>X：</label><input type="number" name="underline.x" value=""></li>
-                    <li><label>Y：</label><input type="number" name="underline.y" value=""></li>
+                    <li><label>顶部：</label><input type="number" name="barcode.x" value=""></li>
+                    <li><label>左边：</label><input type="number" name="barcode.y" value=""></li>
+                    <li><label>文本：</label><input type="text" name="barcode.text" value="12345678"></li>
+                    <li><label>变量：</label><input type="text" name="barcode.var"></li>
+                    <li><label>高度：</label><input type="number" name="barcode.height" value="10"></li>
+                    <li><label>间隙：</label><input type="number" name="barcode.xres" value="0.4"></li>
+                    <li>
+                        <label>类型：</label><select name="barcode.mode">
+                            <option>C39</option>
+                            <option>C39+</option>
+                            <option>C39E</option>
+                            <option>C39E+</option>
+                            <option>C93</option>
+                            <option>S25</option>
+                            <option>S25+</option>
+                            <option>I25</option>
+                            <option>I25+</option>
+                            <option>C128</option>
+                            <option>C128A</option>
+                            <option>C128B</option>
+                            <option>C128C</option>
+                            <option>EAN2</option>
+                            <option>EAN5</option>
+                            <option>EAN8</option>
+                            <option>EAN13</option>
+                            <option>UPCA</option>
+                            <option>UPCE</option>
+                            <option>MSI</option>
+                            <option>MSI+</option>
+                            <option>POSTNET</option>
+                            <option>PLANET</option>
+                            <option>RMS4CC</option>
+                            <option>KIX</option>
+                            <option>IMB</option>
+                            <option>IMBPRE</option>
+                            <option>CODABAR</option>
+                            <option>CODE11</option>
+                            <option>PHARMA</option>
+                            <option>PHARMA2T</option>
+                        </select>
+                    </li>
+                </ul>
+            </li>
+            <li class="type-image hide">
+                <ul>
+                    <li><label>顶部：</label><input type="number" name="image.x" value=""></li>
+                    <li><label>左边：</label><input type="number" name="image.y" value=""></li>
+                    <li><label>地址：</label><input type="text" name="image.url" value=""></li>
+                    <li><label>变量：</label><input type="text" name="image.var"></li>
+                    <li><label>宽度：</label><input type="number" name="image.width" value="30"></li>
+                    <li><label>高度：</label><input type="number" name="image.height" value="15"></li>
+                </ul>
+            </li>
+            <li class="type-underline hide">
+                <ul>
+                    <li><label>顶部：</label><input type="number" name="underline.x" value=""></li>
+                    <li><label>顶部：</label><input type="number" name="underline.y" value=""></li>
                     <li><label>宽度：</label><input type="number" name="underline.width" value="10"></li>
                 </ul>
             </li>
@@ -122,6 +214,6 @@
         </ol>
     </div>
     <script src="js/jquery.min.js"></script>
-    <script src="js/main.js?v=20190331"></script>
+    <script src="js/main.js?v=20190414"></script>
 </body>
 </html>

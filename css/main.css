@@ -7,6 +7,12 @@ body {
 ul{
     list-style:none;margin:0;padding:0
 }
+input[type=checkbox] {
+    margin:0;position: relative;top:3px;
+}
+.width-50 {
+    width:50px;
+}
 #container {
 /*    background: 
     -webkit-linear-gradient(top, transparent 39px, rgb(255, 201, 201) 40px), 
@@ -15,12 +21,14 @@ ul{
     -webkit-background-size: 40px 40px;
     background-size: 40px 40px;
 */
-    width: 210mm;height:297mm;margin: 5mm auto;background-color:#fff;position:relative;overflow:hidden;
+    width: 210mm;height:297mm;margin: 22px auto;background-color:#fff;position:relative;overflow:hidden;
 }
 #container .item {
     position:absolute;white-space: nowrap;overflow: hidden;
 }
-#container .item.active[data-type=cell]::before {
+#container .item.active[data-type=cell]::before,
+#container .item.active[data-type=image]::before
+{
     content: "";
     width: 5px;
     height: 100%;
@@ -28,7 +36,9 @@ ul{
     right: 0;
     cursor: col-resize;
 }
-#container .item.active[data-type=cell]::after {
+#container .item.active[data-type=cell]::after,
+#container .item.active[data-type=image]::after
+{
     content: "";
     width: 100%;
     height: 5px;
@@ -43,10 +53,30 @@ ul{
     border-bottom:1px solid #aaa;margin:4px;
 }
 #form {
-    position:fixed;top:65mm;background:#fff;margin:0px;
+    position:fixed;top:70mm;background:#fff;margin:0px;
+}
+#form input[type=text],
+#form input[type=number]
+{
+    height:22px;line-height:22px;
+}
+#form select {
+    height:22px;line-height:22px;position: relative;top:1px;
+}
+#form textarea {
+    width: 160px;
+}
+#form .font-block {
+    position:relative;width:210px;
+}
+#form .font-block .font-style {
+    position: absolute;
+}
+#form .font-block .font-style input {
+    position: relative;top:3px;
 }
 #tool-bar-content li {
-    border-bottom:1px solid #aaa;margin:4px;
+    margin:4px;padding-bottom: 1px;
 }
 .html {
     position:fixed;right:0;top:15mm;background:#fff;
@@ -60,8 +90,8 @@ ul{
 #output {
     width:50mm;height:30mm;
 }
-.qrcode {
-    border:1px solid #aaa;background:#abcdef;
+.qrcode,.image,.barcode {
+    border:1px solid #aaa;background:#eee;display:flex;align-items: center; justify-content: center;
 }
 #help {
     position:fixed;right:0;top:105mm;background:#fff;
@@ -70,7 +100,7 @@ ul{
     display:none;
 }
 .active {
-    background:#ff0;opacity:0.5;
+    background:#ff0 !important;opacity:0.5;
 }
 .block .title {
     border-radius: 2px;
