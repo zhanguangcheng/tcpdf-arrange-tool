@@ -46,6 +46,9 @@ input[type=checkbox] {
     bottom: 0;
     cursor: row-resize;
 }
+#container .item.active[data-type=line] {
+    cursor: move;
+}
 #tool-bar-title {
     position:fixed;top:15mm;background:#fff;margin:0px;
 }

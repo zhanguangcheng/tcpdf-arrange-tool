@@ -11,7 +11,7 @@
     <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*297</h2>
     <div id="container" style="font-family:仿宋;"></div>
     <div id="tool-bar-title" class="block droppable">
-        <p class="title">元素类型</p>
+        <p class="title">组件类型</p>
         <ul>
             <li><label><input type="radio" name="tool" value="global" checked>全局配置</label></li>
             <li><label><input type="radio" name="tool" value="text">文本</label></li>
@@ -19,11 +19,11 @@
             <li><label><input type="radio" name="tool" value="qrcode">二维码</label></li>
             <li><label><input type="radio" name="tool" value="barcode">条形码</label></li>
             <li><label><input type="radio" name="tool" value="image">图片</label></li>
-            <li><label><input type="radio" name="tool" value="underline">下划线</label></li>
+            <li><label><input type="radio" name="tool" value="line">直线</label></li>
         </ul>
     </div>
     <form id="form" class="block droppable">
-        <p class="title">元素属性</p>
+        <p class="title">组件属性</p>
         <ul id="tool-bar-content">
             <li class="type-global">
                 <ul>
@@ -186,11 +186,11 @@
                     <li><label>高度：</label><input type="number" name="image.height" value="15"></li>
                 </ul>
             </li>
-            <li class="type-underline hide">
+            <li class="type-line hide">
                 <ul>
-                    <li><label>顶部：</label><input type="number" name="underline.x" value=""></li>
-                    <li><label>顶部：</label><input type="number" name="underline.y" value=""></li>
-                    <li><label>宽度：</label><input type="number" name="underline.width" value="10"></li>
+                    <li><label>顶部：</label><input type="number" name="line.x" value=""></li>
+                    <li><label>顶部：</label><input type="number" name="line.y" value=""></li>
+                    <li><label>宽度：</label><input type="number" name="line.width" value="10"></li>
                 </ul>
             </li>
         </ul>
@@ -206,10 +206,10 @@
     <div id="help" class="block droppable">
         <p class="title">使用小提示</p>
         <ol>
-            <li>选择合适的元素类型，点击空白处新增元素</li>
-            <li>按Delete键删除元素</li>
-            <li>拖拽元素或者按方向键移动元素</li>
-            <li>选中元素，可以修改对应的“元素属性”</li>
+            <li>选择合适的组件类型，点击空白处新增组件</li>
+            <li>按Delete键删除组件</li>
+            <li>拖拽组件或者按方向键移动组件</li>
+            <li>选中组件，可以修改对应的“组件属性”</li>
             <li>可以复制“排版源码”分享给其他小伙伴使用</li>
         </ol>
     </div>

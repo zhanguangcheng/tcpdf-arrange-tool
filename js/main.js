@@ -1,7 +1,7 @@
 (function() {
     // 当前类型
     var type = 'global';
-    // 当前选中元素
+    // 当前选中组件
     var current = null;
     var phpVariables = [];
     var global = {
@@ -327,28 +327,28 @@
                 });
             }
         },
-        underline: {
+        line: {
             create: function (opt) {
                 var element = document.createElement('div');
                 element.className = 'item';
-                element.dataset.type = 'underline';
-                element.style.left = opt['underline.x'] + 'mm';
-                element.style.top = opt['underline.y'] + 'mm';
-                element.style.width = opt['underline.width'] + 'mm';
+                element.dataset.type = 'line';
+                element.style.left = opt['line.x'] + 'mm';
+                element.style.top = opt['line.y'] + 'mm';
+                element.style.width = opt['line.width'] + 'mm';
                 element.style.borderTop = '2px solid #000';
                 return element;
             },
             loadConfig: function (element) {
-                $('[value=underline').prop('checked', true).change();
-                $('[name="underline.x"]').val(parseInt(element.style.left));
-                $('[name="underline.y"]').val(parseInt(element.style.top));
-                $('[name="underline.width"]').val(parseInt(element.style.width));
+                $('[value=line').prop('checked', true).change();
+                $('[name="line.x"]').val(parseInt(element.style.left));
+                $('[name="line.y"]').val(parseInt(element.style.top));
+                $('[name="line.width"]').val(parseInt(element.style.width));
             },
             update: function (element) {
                 var opt = getConfig();
-                element.style.left = opt['underline.x'] + 'mm';
-                element.style.top = opt['underline.y'] + 'mm';
-                element.style.width = opt['underline.width'] + 'mm';
+                element.style.left = opt['line.x'] + 'mm';
+                element.style.top = opt['line.y'] + 'mm';
+                element.style.width = opt['line.width'] + 'mm';
             },
             getCode: function (element) {
                 return render("$pdf->Line({x1}, {y1}, {x2}, {y2});", {
@@ -366,7 +366,7 @@
             var isB = element.style.fontWeight === 'bold';
             var isI = element.style.fontStyle === 'italic';
             var isU = element.style.textDecoration === 'underline';
-            var family = element.dataset.fontFamily || runtime.fontFamily;
+            var family = element.dataset.fontFamily || global.fontFamily;
             var background = element.dataset.background || runtime.background;
             var style = (isB ? 'B' : '') + (isI ? 'I' : '') + (isU ? 'U' : '');
             if (
@@ -425,19 +425,20 @@
     document.body.oncontextmenu = function() {
         return false;
     };
+
     // 关闭窗口确认
     window.onbeforeunload = function() {
         return false;
     };
 
-    // 切换元素类型
+    // 切换组件类型
     $('input', $toolBarTitle).on('change', function() {
         var index = $(this).parents('li').index();
         type = this.value;
         $($('>li', $toolBarContent)[index]).show().siblings().hide();
     });
 
-    // 画布点击,绘制元素,标记当前元素
+    // 画布点击,绘制组件,标记当前组件
     $container.on('mousedown', function(event) {
         if (event.button !== 0) return;
         var opt = getConfig();
@@ -465,7 +466,7 @@
         build();
     });
 
-    // 右键失去当前元素焦点
+    // 右键失去当前组件焦点
     $container.on('mousedown', function(event) {
         if (event.button === 2) {
             current = null;
@@ -473,7 +474,7 @@
         }
     });
 
-    // 拖拽移动元素
+    // 拖拽移动组件
     (function(){
         var x = 0;
         var y = 0;
@@ -537,7 +538,7 @@
         });
     }());
     
-    // 键盘移动元素
+    // 键盘移动组件
     $(document).on('keydown', function(event) {
         if (event.target !== document.body) {
             return true;
@@ -569,7 +570,7 @@
         return true;
     });
 
-    // 修改配置,更新元素
+    // 修改配置,更新组件
     $form.on('input', 'input,textarea', function() {
         if (type === 'global') {
             switch (this.name) {
@@ -663,20 +664,20 @@
         }
     }();
 
-    // 根据元素加载配置
+    // 根据组件加载配置
     function loadConfig(element) {
         var type = $(element).data('type');
         actions[type].loadConfig(element);
     }
 
-    // 根据配置更新元素
+    // 根据配置更新组件
     function update(element) {
         var type = $(element).data('type');
         actions[type].update(element);
         build();
     }
 
-    // 删除元素
+    // 删除组件
     function remove(element) {
         if (element) {
             $(element).remove();
@@ -810,5 +811,14 @@
         return template.replace(pattern, function (match, key, value) {
             return key in data ? data[key] : '';
         });
+    }
+
+    // 自动加载/保存代码
+    if (typeof localStorage === 'object') {
+        $html.val(localStorage.getItem('html-cache')).trigger('change');
+        (function save() {
+            localStorage.setItem('html-cache', $html.val());
+            setTimeout(save, 5000);
+        })();
     }
 }());
