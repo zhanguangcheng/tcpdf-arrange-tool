@@ -189,19 +189,23 @@
             },
             getCode: function (element) {
                 var self = this;
-                var border = align = '';
+                var border = '';
+                var align = 'C'
+                var valign = 'M';
                 border += element.style.borderLeft ? 'L' : '';
                 border += element.style.borderTop ? 'T' : '';
                 border += element.style.borderRight ? 'R' : '';
                 border += element.style.borderBottom ? 'B' : '';
+                align = element.dataset.align ? element.dataset.align.substr(0, 1) : align;
+                valign = element.dataset.align ? element.dataset.align.substr(1, 1) : valign;
                 return actions.getPrepareCode(element) + render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', {fill}, 1, {x}, {y}, true, 0, false, true, {height}, '{valign}', {fit});", {
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.height),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     border: border,
-                    align: element.dataset.align.substr(0, 1),
-                    valign: element.dataset.align.substr(1, 1),
+                    align: align,
+                    valign: valign,
                     fill: element.dataset.background === '#ffffff' ? 'false' : 'true',
                     text: actions.getVariableCode(element, self.getText(element)),
                     fit: element.dataset.fit ? 'true' : 'false'
