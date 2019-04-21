@@ -13,47 +13,42 @@ input[type=checkbox] {
 .width-50 {
     width:50px;
 }
+/* 清理浮动 */
+.clearfix{*zoom:1;}
+.clearfix:before,.clearfix:after{display:table;content:"";line-height:0;}
+.clearfix:after{clear:both;}
 #container {
-/*    background: 
-    -webkit-linear-gradient(top, transparent 39px, rgb(255, 201, 201) 40px), 
-    -webkit-linear-gradient(left, transparent 39px, rgb(202, 202, 202) 40px)
-    ;
-    -webkit-background-size: 40px 40px;
-    background-size: 40px 40px;
-*/
-    width: 210mm;height:297mm;margin: 22px auto;background-color:#fff;position:relative;overflow:hidden;
+    width: 210mm;margin: 24px auto 0;font-family:仿宋;
+}
+#container .paper {
+    width: 210mm;height:297mm;margin: 0px auto 14px;background-color:#fff;position:relative;overflow:hidden;
 }
 #container .item {
     position:absolute;white-space: nowrap;overflow: hidden;
 }
-#container .item.active[data-type=cell]::before,
-#container .item.active[data-type=image]::before
-{
-    content: "";
-    width: 5px;
-    height: 100%;
-    position: absolute;
-    right: 0;
-    cursor: col-resize;
+#container .item:hover {
+    background: #f2f2f2 !important;
 }
-#container .item.active[data-type=cell]::after,
-#container .item.active[data-type=image]::after
-{
-    content: "";
-    width: 100%;
-    height: 5px;
-    position: absolute;
-    bottom: 0;
-    cursor: row-resize;
+#container .active {
+    background:#ffff87 !important;;
 }
-#container .item.active[data-type=line] {
-    cursor: move;
+#container .active:hover {
+    background:#ffff87 !important;;
+}
+
+#container [data-type=line] {
+    height:2px;background: #000 !important;
+}
+#container .item[data-type=line]:hover,
+#container .item[data-type=line].active
+{
+    background: #f00 !important;
 }
 #tool-bar-title {
     position:fixed;top:15mm;background:#fff;margin:0px;
 }
 #tool-bar-title li {
-    border-bottom:1px solid #aaa;margin:4px;
+    margin:4px;
 }
 #form {
     position:fixed;top:70mm;background:#fff;margin:0px;
@@ -94,16 +89,13 @@ input[type=checkbox] {
     width:50mm;height:30mm;
 }
 .qrcode,.image,.barcode {
-    border:1px solid #aaa;background:#eee;display:flex;align-items: center; justify-content: center;
+    border:1px solid #aaa;background:#f6f6f6;display:flex;align-items: center; justify-content: center;
 }
 #help {
     position:fixed;right:0;top:105mm;background:#fff;
 }
 .hide {
     display:none;
-}
-.active {
-    background:#ff0 !important;opacity:0.5;
 }
 .block .title {
     border-radius: 2px;
@@ -116,4 +108,22 @@ input[type=checkbox] {
 .droppable {
     border-radius: 2px;
     box-shadow: #525659 2px 2px 10px;
+}
+.align-items {
+    width: 40px;vertical-align: top;display: inline-block;
+}
+.align-items input {
+    margin:0;float:left;
+}
+.insert-paper-button {
+    text-align: center;margin:10px auto;width:210mm;
+}
+.btn {
+    border:1px solid #a5a5a5;background:#eee;padding: 3px 20px;font-size:12px;border-radius: 14px;height:28px;outline:none;
+}
+.btn:hover {
+    border:1px solid #a1a1a1;background:#fff;
+}
+.btn-fullsize {
+    width:100%;
 }

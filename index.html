@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>TCPDF排版工具</title>
-    <link rel="stylesheet" href="css/main.css?v=20190414">
+    <link rel="stylesheet" href="css/main.css?v=20190421">
 </head>
 <body>
-    <h2 id="size" style=" height: 10mm; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">210*297</h2>
-    <div id="container" style="font-family:仿宋;"></div>
+    <h2 id="size" style=" height: 35px; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">A4：210*297</h2>
+    <div id="container"><div class="paper"></div></div>
+    <div class="insert-paper-button">
+        <button type="button" class="btn btn-fullsize fn-insert-paper">添加一页</button>
+    </div>
     <div id="tool-bar-title" class="block droppable">
         <p class="title">组件类型</p>
         <ul>
@@ -101,19 +104,30 @@
                     <li style="position:relative;">
                         <label>边框：</label>
                         <input type="checkbox" name="cell.border.left" value="1" style="position:absolute;left: 36px;top: 4px;" checked>
-                        <input type="checkbox" name="cell.border.top" value="1" style="position:absolute;left: 49px;top: -3px;" checked>
+                        <input type="checkbox" name="cell.border.top" value="1" style="position:absolute;left: 49px;top: -2px;" checked>
                         <input type="checkbox" name="cell.border.right" value="1" style="position:absolute;left: 62px;top: 4px;">
-                        <input type="checkbox" name="cell.border.bottom" value="1" style="position:absolute;top: 11px;left: 49px;">
+                        <input type="checkbox" name="cell.border.bottom" value="1" style="position:absolute;top: 9px;left: 49px;">
+                    </li>
+                    <li>
+                        <label>对齐：</label><div class="align-items clearfix">
+                            <input type="radio" name="cell.align" value="LT">
+                            <input type="radio" name="cell.align" value="CT">
+                            <input type="radio" name="cell.align" value="RT">
+                            <input type="radio" name="cell.align" value="LM">
+                            <input type="radio" name="cell.align" value="CM" checked>
+                            <input type="radio" name="cell.align" value="RM">
+                            <input type="radio" name="cell.align" value="LB">
+                            <input type="radio" name="cell.align" value="CB">
+                            <input type="radio" name="cell.align" value="RB">
+                        </div>
+                    </li>
+                    <li>
+                        <label>内边距：</label>
+                        <input type="number" name="cell.padding" value="0">
                     </li>
                     <li>
                         <label>背景颜色：</label>
                         <input type="color" name="cell.background" value="#ffffff">
-                    </li>
-                    <li>
-                        <label>水平对齐方式：</label>
-                        <label><input type="radio" name="cell.align" value="flex-start">左</label>
-                        <label><input type="radio" name="cell.align" value="center" checked>中</label>
-                        <label><input type="radio" name="cell.align" value="flex-end">右</label>
                     </li>
                     <li>
                         <label>宽度/字体自适应：</label>
@@ -190,7 +204,7 @@
                 <ul>
                     <li><label>顶部：</label><input type="number" name="line.x" value=""></li>
                     <li><label>顶部：</label><input type="number" name="line.y" value=""></li>
-                    <li><label>宽度：</label><input type="number" name="line.width" value="10"></li>
+                    <li><label>宽度：</label><input type="number" name="line.width" value="50"></li>
                 </ul>
             </li>
         </ul>
@@ -214,6 +228,6 @@
         </ol>
     </div>
     <script src="js/jquery.min.js"></script>
-    <script src="js/main.js?v=20190414"></script>
+    <script src="js/main.js?v=20190421"></script>
 </body>
 </html>

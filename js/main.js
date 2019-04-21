@@ -3,7 +3,6 @@
     var type = 'global';
     // 当前选中组件
     var current = null;
-    var phpVariables = [];
     var global = {
         creator: 'CLF',
         author: 'Grass',
@@ -20,6 +19,15 @@
         msungstdlight:"Sung",
     };
 
+    var alignMap = {
+        L: 'flex-start',
+        C: 'center',
+        R: 'flex-end',
+        T: 'flex-start',
+        M: 'center',
+        B: 'flex-end',
+    };
+
     var runtime = {
         fontFamily: global.fontFamily,
         fontSize: null,
@@ -27,7 +35,9 @@
         fontStyleI: false,
         fontStyleU: false,
         background: '#ffffff',
+        cellPadding: 0,
     };
+    var runtimeCopy = $.extend({}, runtime);
 
     var $form = $('#form');
     var $html = $('#html');
@@ -80,12 +90,15 @@
                 element.dataset.var = opt['text.var'];
             },
             getCode: function (element) {
-                var obj = actions.pushVariable(element);
+                var self = this;
                 return actions.getPrepareCode(element) + render("$pdf->Text({x}, {y}, {text});", {
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
-                    text: actions.getVariableCode(obj)
+                    text: actions.getVariableCode(element, self.getText(element))
                 });
+            },
+            getText: function (element) {
+                return element.innerHTML;
             }
         },
         cell: {
@@ -98,10 +111,10 @@
                 element.style.width = opt['cell.width'] + 'mm';
                 element.style.height = opt['cell.height'] + 'mm';
                 element.style.display = 'flex';
-                element.style.alignItems = 'center';
-                element.style.justifyContent = opt['cell.align'];
+                element.style.justifyContent = alignMap[opt['cell.align'].substr(0, 1)];
+                element.style.alignItems = alignMap[opt['cell.align'].substr(1, 1)];
+                element.dataset.align = opt['cell.align'];
                 element.style.fontSize = opt['cell.font.size'] + 'pt';
-                element.style.textAlign = opt['cell.align'];
                 element.innerHTML = lnToBr(opt['cell.text']);
                 if (opt['cell.border.left']) {
                     element.style.borderLeft = '1px solid #000';
@@ -121,6 +134,7 @@
                 element.style.fontWeight = opt['cell.font.style.b'] ? 'bold' : 'normal';
                 element.style.fontStyle = opt['cell.font.style.i'] ? 'italic' : 'normal';
                 element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
+                element.style.padding = opt['cell.padding'] + 'mm';
                 element.style.background = opt['cell.background'];
                 element.dataset.background = opt['cell.background'];
                 return element;
@@ -137,12 +151,13 @@
                 $('[name="cell.border.top"]').prop('checked', !!element.style.borderTop);
                 $('[name="cell.border.right"]').prop('checked', !!element.style.borderRight);
                 $('[name="cell.border.bottom"]').prop('checked', !!element.style.borderBottom);
-                $($('[name="cell.align"]').get({'flex-start':0,'center':1,'flex-end':2}[element.style.justifyContent])).prop('checked', true);
+                $('[name="cell.align"]').filter('[value='+element.dataset.align+']').prop('checked', true);
                 $('[name="cell.fit"]').prop('checked', !!element.dataset.fit);
                 $('[name="cell.font.family"]').val(element.dataset.fontFamily || '');
                 $('[name="cell.font.style.b"]').prop('checked', element.style.fontWeight === 'bold');
                 $('[name="cell.font.style.i"]').prop('checked', element.style.fontStyle === 'italic');
                 $('[name="cell.font.style.u"]').prop('checked', element.style.textDecoration === 'underline');
+                $('[name="cell.padding"]').val(parseInt(element.style.padding) || 0);
                 $('[name="cell.var"]').val(element.dataset.var);
                 $('[name="cell.background"]').val(element.dataset.background);
             },
@@ -153,7 +168,9 @@
                 element.style.width = opt['cell.width'] + 'mm';
                 element.style.height = opt['cell.height'] + 'mm';
                 element.style.fontSize = opt['cell.font.size'] + 'pt';
-                element.style.justifyContent = opt['cell.align'];
+                element.style.justifyContent = alignMap[opt['cell.align'].substr(0, 1)];
+                element.style.alignItems = alignMap[opt['cell.align'].substr(1, 1)];
+                element.dataset.align = opt['cell.align'];
                 element.innerHTML = lnToBr(opt['cell.text']);
                 element.style.borderLeft = opt['cell.border.left'] ? '1px solid #000' : '';
                 element.style.borderTop = opt['cell.border.top'] ? '1px solid #000' : '';
@@ -165,29 +182,33 @@
                 element.style.fontWeight = opt['cell.font.style.b'] ? 'bold' : 'normal';
                 element.style.fontStyle = opt['cell.font.style.i'] ? 'italic' : 'normal';
                 element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
+                element.style.padding = opt['cell.padding'] + 'mm';
                 element.dataset.var = opt['cell.var'];
                 element.style.background = opt['cell.background'];
                 element.dataset.background = opt['cell.background'];
             },
             getCode: function (element) {
-                var obj = actions.pushVariable(element);
+                var self = this;
                 var border = align = '';
                 border += element.style.borderLeft ? 'L' : '';
                 border += element.style.borderTop ? 'T' : '';
                 border += element.style.borderRight ? 'R' : '';
                 border += element.style.borderBottom ? 'B' : '';
-                align = { 'flex-start': 'L', 'center': 'C', 'flex-end': 'R' }[element.style.justifyContent];
-                return actions.getPrepareCode(element) + render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', {fill}, 1, {x}, {y}, true, 0, false, true, {height}, 'M', {fit});", {
+                return actions.getPrepareCode(element) + render("$pdf->MultiCell({width}, {height}, {text}, '{border}', '{align}', {fill}, 1, {x}, {y}, true, 0, false, true, {height}, '{valign}', {fit});", {
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.height),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     border: border,
-                    align: align,
+                    align: element.dataset.align.substr(0, 1),
+                    valign: element.dataset.align.substr(1, 1),
                     fill: element.dataset.background === '#ffffff' ? 'false' : 'true',
-                    text: actions.getVariableCode(obj),
+                    text: actions.getVariableCode(element, self.getText(element)),
                     fit: element.dataset.fit ? 'true' : 'false'
                 });
+            },
+            getText: function (element) {
+                return element.innerHTML;
             }
         },
         qrcode: {
@@ -220,21 +241,23 @@
                 element.style.top = opt['qrcode.y'] + 'mm';
                 element.style.width = opt['qrcode.width'] + 'mm';
                 element.style.height = opt['qrcode.width'] + 'mm';
-                // element.style.lineHeight = opt['qrcode.width'] + 'mm';
                 element.dataset.text = opt['qrcode.text'];
                 element.dataset.border = opt['qrcode.border'] ? '1' : '';
                 element.dataset.var = opt['qrcode.var'];
             },
             getCode: function (element) {
-                var obj = actions.pushVariable(element, element.dataset.text);
+                var self = this;
                 return render("$pdf->write2DBarcode({text},'QRCODE', {x}, {y}, {width}, {height}, array('padding'=>'auto','border'=>{border}));", {
-                    text: actions.getVariableCode(obj),
+                    text: actions.getVariableCode(element, self.getText(element)),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     width: parseInt(element.style.width),
                     height: parseInt(element.style.width),
                     border: element.dataset.border ? 'true' : 'false'
                 });
+            },
+            getText: function (element) {
+                return element.dataset.text;
             }
         },
         barcode: {
@@ -274,15 +297,18 @@
                 element.dataset.var = opt['barcode.var'];
             },
             getCode: function (element) {
-                var obj = actions.pushVariable(element, element.dataset.text);
+                var self = this;
                 return render("$pdf->write1DBarcode({text}, '{type}', {x}, {y}, '', {h}, {xres});", {
-                    text: actions.getVariableCode(obj),
+                    text: actions.getVariableCode(element, self.getText(element)),
                     type: element.dataset.mode,
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     h: parseInt(element.style.height),
                     xres: element.dataset.xres,
                 });
+            },
+            getText: function (element) {
+                return element.dataset.text;
             }
         },
         image: {
@@ -317,14 +343,17 @@
                 element.dataset.var = opt['image.var'];
             },
             getCode: function (element) {
-                var obj = actions.pushVariable(element, element.dataset.url);
+                var self = this;
                 return render("$pdf->Image({file}, {x}, {y}, {w}, {h});", {
-                    file: actions.getVariableCode(obj),
+                    file: actions.getVariableCode(element, self.getText(element)),
                     x: parseInt(element.style.left),
                     y: parseInt(element.style.top),
                     w: parseInt(element.style.width),
                     h: parseInt(element.style.height),
                 });
+            },
+            getText: function (element) {
+                return element.dataset.url;
             }
         },
         line: {
@@ -335,7 +364,6 @@
                 element.style.left = opt['line.x'] + 'mm';
                 element.style.top = opt['line.y'] + 'mm';
                 element.style.width = opt['line.width'] + 'mm';
-                element.style.borderTop = '2px solid #000';
                 return element;
             },
             loadConfig: function (element) {
@@ -357,6 +385,9 @@
                     x2: parseInt(element.style.left) + parseInt(element.style.width),
                     y2: parseInt(element.style.top)
                 });
+            },
+            getText: function (element) {
+                return '';
             }
         },
         getPrepareCode: function (element) {
@@ -392,6 +423,15 @@
                 code.push(render('$pdf->SetFontSize({size});', { size: fontSize }));
             }
 
+            // 内边距
+            if (element.dataset.type === 'cell') {
+                var cellPadding = parseInt(element.style.padding) || 0;
+                if (cellPadding !== runtime.cellPadding) {
+                    runtime.cellPadding = cellPadding
+                    code.push(render('$pdf->setCellPadding({padding});', { padding: cellPadding }));
+                }
+            }
+
             // 背景颜色
             if (background !== runtime.background) {
                 runtime.background = background;
@@ -403,22 +443,17 @@
             }
             return code.join("\n") + (code.length ? "\n" : '');
         },
-        pushVariable: function (element, value) {
+        getVariableCode: function(element, value) {
             var variable = $.trim(element.dataset.var);
-            var obj = {
-                key: variable,
-                value: brToLn(value === undefined ? element.innerHTML : value)
-            };
-            if (variable) {
-                phpVariables.push(obj);
-            }
-            return obj;
+            var page = actions.getElementPage(element);
+            value = brToLn(value === undefined ? element.innerHTML : value)
+            return variable
+                ? "$data['page" + page + "']['" + variable + "']"
+                : '\"' + value + '\"'
         },
-        getVariableCode: function(obj) {
-            return obj.key
-                ? "$data['page1']['" + obj.key + "']"
-                : '\"' + obj.value + '\"'
-        }
+        getElementPage:function (element) {
+            return $(element).parent('.paper').index() + 1;
+        },
     }
 
     // 禁止右键菜单
@@ -462,7 +497,7 @@
         $(div).addClass('active');
         current = div;
         loadConfig(current);
-        $container.append(div);
+        $(event.target).append(div);
         build();
     });
 
@@ -482,8 +517,39 @@
         var t = 0;
         var isMouseDown = false;
         var element = null;
-        var type = 'move';
         var width = height = 0;
+
+        var component = function() {
+            var width, height, offsetX, offsetY, type;
+            var getType = function(e) {
+                width = parseInt(e.target.style.width);
+                height = parseInt(e.target.style.height);
+                offsetX = Math.ceil(pxToMm(e.offsetX + 5, 'x'));
+                offsetY = Math.ceil(pxToMm(e.offsetY + 5, 'y'));
+                if (offsetX >= width && offsetY >= height) {
+                    return 'se-resize';
+                } else if (offsetX >= width) {
+                    return 'e-resize';
+                } else if (offsetY >= height) {
+                    return 's-resize';
+                } else {
+                    return 'move';
+                }
+            };
+            return {
+                setType: function(e, t) {
+                    type = t || getType(e);
+                },
+                getType: function(e) {
+                    return type;
+                },
+                applyCursor: function(e) {
+                    var type = getType(e);
+                    e.target.style.cursor = type === 'move' ? '' : type;
+                },
+            }
+        }();
+
         $(document).on('mousedown', '.item,.droppable', function(e) {
             if ($(e.target).hasClass('item') || $(e.target).hasClass('title')) {
                 isMouseDown = true;
@@ -493,32 +559,39 @@
                 t = this.offsetTop;
                 width = parseInt(e.target.style.width);
                 height = parseInt(e.target.style.height);
-                type = 'move';
+                component.setType(e, 'move');
                 
                 if (e.target.dataset.type === 'cell' || e.target.dataset.type === 'image') {
-                    if (Math.ceil(pxToMm(e.offsetX + 5, 'x')) >= width) {
-                        type = 'col-resize';
-                    } else if (Math.ceil(pxToMm(e.offsetY + 5, 'y')) >= height) {
-                        type = 'row-resize';
-                    }
+                    component.setType(e);
                 }
                 
                 element = this;
             }
         });
         $(document).on('mousemove', function (e) {
+            if (e.target.dataset.type === 'cell' || e.target.dataset.type === 'image') {
+                component.applyCursor(e);
+            }
+            
             if (isMouseDown) {
                 var nx = e.pageX;
                 var ny = e.pageY;
                 var nl = nx - (x - l);
                 var nt = ny - (y - t);
+                var type = component.getType(e);
                 switch (type) {
-                    case 'col-resize':
-                        element.style.width = width + Math.ceil(pxToMm(nx-x, 'x')) + 'mm';
+                    case 'se-resize':
+                        element.style.width = width + Math.ceil(pxToMm(nx - x, 'x')) + 'mm';
+                        element.style.height = height + Math.ceil(pxToMm(ny - y, 'y')) + 'mm';
+                        setConfig(e.target.dataset.type + '.width', parseInt(element.style.width));
+                        setConfig(e.target.dataset.type + '.height', parseInt(element.style.height));
+                        break;
+                    case 'e-resize':
+                        element.style.width = width + Math.ceil(pxToMm(nx - x, 'x')) + 'mm';
                         setConfig(e.target.dataset.type + '.width', parseInt(element.style.width));
                         break;
-                    case 'row-resize':
-                        element.style.height = height + Math.ceil(pxToMm(ny-y, 'y')) + 'mm';
+                    case 's-resize':
+                        element.style.height = height + Math.ceil(pxToMm(ny - y, 'y')) + 'mm';
                         setConfig(e.target.dataset.type + '.height', parseInt(element.style.height));
                         break;
                     default:
@@ -570,6 +643,16 @@
         return true;
     });
 
+    // 添加一页
+    $('.fn-insert-paper').on('click', function () {
+        var size = getPaperSize(global.paper);
+        $container.append(render('<div class="paper" style="width: {width};height: {height};"></div>', {
+            width: size.width + 'mm',
+            height: size.height + 'mm'
+        }));
+        build();
+    });
+
     // 修改配置,更新组件
     $form.on('input', 'input,textarea', function() {
         if (type === 'global') {
@@ -595,8 +678,9 @@
                 case 'global.paper.size':
                     var size = getPaperSize(this.value);
                     global.paper = this.value;
-                    $size.html(size.width + '*' + size.height);
-                    $container.css({
+                    $size.html(global.paper + '：' + size.width + '*' + size.height);
+                    $container.css('width', size.width + 'mm');
+                    $container.find('.paper').css({
                         width: size.width + 'mm',
                         height: size.height + 'mm'
                     });
@@ -609,6 +693,7 @@
                 // 特定的字体才有加粗和斜体功能
                 $(this).parent()
                     .find('[name*="font.style.b"],[name*="font.style.i"]')
+                    .prop('checked', false)
                     .attr('disabled', this.value !== 'msungstdlight');
             }
         }
@@ -616,17 +701,22 @@
 
     $html.on('change', function() {
         var html = $html.val();
+        var items = getSnippet(html, 'items');
         try {
             global = JSON.parse(getSnippet(html, 'global'));
         } catch(err) {
         }
-        $container.html(getSnippet(html, 'items'));
+        if (items.indexOf('class="paper"') === -1) {
+            items = '<div class="paper">' + items + '</div>';
+        }
+        $container.html(items);
         setConfig('global.title', global.title);
         setConfig('global.creator', global.creator);
         setConfig('global.author', global.author);
         setConfig('global.font.family', global.fontFamily);
         setConfig('global.paper.size', global.paper);
         $form.find('select').trigger('change');
+        build();
     });
 
     function lnToBr(text) {
@@ -696,36 +786,10 @@
             items: $container.html()
         }));
         $output.val(getPHPCode());
-        runtime = {
-            fontFamily: global.fontFamily,
-            fontSize: null,
-            fontStyleB: false,
-            fontStyleI: false,
-            fontStyleU: false,
-            fontStyleU: false,
-            background: '#ffffff',
-        };
+        runtime = $.extend({}, runtimeCopy);
     }
 
     function getPHPCode() {
-        // 按照top,left排序
-        var data = $container.find('.item').toArray().sort(function(a,b) {
-            var x1 = parseInt(a.style.left);
-            var x2 = parseInt(b.style.left);
-            var y1 = parseInt(a.style.top);
-            var y2 = parseInt(b.style.top);
-            if (y1 < y2) {
-                return -1;
-            } else if (y1 > y2) {
-                return 1;
-            }
-            if (x1 < x2) {
-                return -1
-            } else if (x1 > x2) {
-                return 1;
-            }
-            return 0;
-        });
         var code = [
             "$pdf->setPrintHeader(false);",
             "$pdf->setPrintFooter(false);",
@@ -738,31 +802,55 @@
             orien: global.paper.substr(-1) == 'L' ? 'L' : 'P',
             size: global.paper.substr(-1) == 'L' ? global.paper.substring(0, global.paper.indexOf('L')) : global.paper,
         };
-        code.unshift(render("$pdf = new TCPDF('{orien}', 'mm', '{size}', true, 'UTF-8', false);", paper));
-        code.push(render("$pdf->SetCreator('{creator}');", { creator: global.creator}));
-        code.push(render("$pdf->SetAuthor('{author}');", { author: global.author}));
-        code.push(render("$pdf->SetTitle('{title}');", {title: global.title}));
-        code.push(render("$pdf->SetFont('{font}');", {font: global.fontFamily}));
-        code.push(render("$pdf->AddPage('{orien}', '{size}');", paper));
-
-        for (var i=0; i<data.length; i++) {
-            code.push(actions[data[i].dataset.type].getCode(data[i]));
-        }
-
-        code.push("$pdf->Output();");
         var variables = [];
         var pushedKey = [];
-        if (phpVariables.length) {
-            variables.push("$data['page1'] = array(");
-            for (var i = 0; i < phpVariables.length; i++) {
-                if ($.inArray(phpVariables[i].key, pushedKey) === -1) {
-                    pushedKey.push(phpVariables[i].key);
-                    variables.push("    '" + phpVariables[i].key + "' => \"" + phpVariables[i].value + "\",");
+        variables.push("$data = array(");
+        code.unshift(render("$pdf = new TCPDF('{orien}', 'mm', '{size}', true, 'UTF-8', false);", paper));
+        code.push(render("$pdf->SetCreator('{creator}');", { creator: global.creator }));
+        code.push(render("$pdf->SetAuthor('{author}');", { author: global.author }));
+        code.push(render("$pdf->SetTitle('{title}');", { title: global.title }));
+        code.push(render("$pdf->SetFont('{font}');", { font: global.fontFamily }));
+
+        $container.find('.paper').each(function(index) {
+            var page = index + 1;
+            // 按照top,left排序
+            var data = $(this).find('.item').toArray().sort(function(a,b) {
+                var x1 = parseInt(a.style.left);
+                var x2 = parseInt(b.style.left);
+                var y1 = parseInt(a.style.top);
+                var y2 = parseInt(b.style.top);
+                if (y1 < y2) {
+                    return -1;
+                } else if (y1 > y2) {
+                    return 1;
                 }
+                if (x1 < x2) {
+                    return -1
+                } else if (x1 > x2) {
+                    return 1;
+                }
+                return 0;
+            });
+            
+            code.push("\n// page" + page);
+            code.push(render("$pdf->AddPage('{orien}', '{size}');", paper));
+            variables.push("    'page" + page + "' => array(");
+            for (var i=0; i<data.length; i++) {
+                var key = $.trim(data[i].dataset.var);
+                if (key) {
+                    var text = actions[data[i].dataset.type].getText(data[i]);
+                    if ($.inArray(page + key, pushedKey) === -1) {
+                        pushedKey.push(page + key);
+                        variables.push("        '" + key + "' => \"" + text + "\",");
+                    }
+                }
+                code.push(actions[data[i].dataset.type].getCode(data[i]));
             }
-            variables.push(");\n\n");
-        }
-        phpVariables = [];
+            variables.push("    ),");
+        });
+        variables.push(");\n\n");
+        
+        code.push("\n$pdf->Output();");
         return variables.join("\n") + code.join("\n");
     }
 
@@ -815,7 +903,8 @@
 
     // 自动加载/保存代码
     if (typeof localStorage === 'object') {
-        $html.val(localStorage.getItem('html-cache')).trigger('change');
+        var code = localStorage.getItem('html-cache');
+        code && $html.val(code).trigger('change');
         (function save() {
             localStorage.setItem('html-cache', $html.val());
             setTimeout(save, 5000);
