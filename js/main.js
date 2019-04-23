@@ -842,7 +842,7 @@
             for (var i=0; i<data.length; i++) {
                 var key = $.trim(data[i].dataset.var);
                 if (key) {
-                    var text = actions[data[i].dataset.type].getText(data[i]);
+                    var text = brToLn(actions[data[i].dataset.type].getText(data[i]));
                     if ($.inArray(page + key, pushedKey) === -1) {
                         pushedKey.push(page + key);
                         variables.push("        '" + key + "' => \"" + text + "\",");
