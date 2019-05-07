@@ -7,16 +7,15 @@
         creator: 'CLF',
         author: 'Grass',
         title: 'Title',
-        fontFamily: 'simfang',
+        fontFamily: 'stsongstdlight',
         paper: 'A4'
     };
 
     // 字体列表
     var fontFamily = {
-        simfang:"仿宋",
+        stsongstdlight:"宋体",
         simhei:"黑体",
         simkai:"楷体",
-        msungstdlight:"Sung",
     };
 
     var alignMap = {
@@ -698,7 +697,7 @@
                 $(this).parent()
                     .find('[name*="font.style.b"],[name*="font.style.i"]')
                     .prop('checked', false)
-                    .attr('disabled', this.value !== 'msungstdlight');
+                    .attr('disabled', this.value !== 'stsongstdlight');
             }
         }
     });
