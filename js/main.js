@@ -14,6 +14,7 @@
     // 字体列表
     var fontFamily = {
         stsongstdlight:"宋体",
+        simfang:"仿宋",
         simhei:"黑体",
         simkai:"楷体",
     };
