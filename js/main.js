@@ -159,7 +159,7 @@
                 $('[name="cell.font.style.u"]').prop('checked', element.style.textDecoration === 'underline');
                 $('[name="cell.padding"]').val(parseInt(element.style.padding) || 0);
                 $('[name="cell.var"]').val(element.dataset.var);
-                $('[name="cell.background"]').val(element.dataset.background);
+                $('[name="cell.background"]').val(element.dataset.background || '#ffffff');
             },
             update: function (element) {
                 var opt = getConfig();
