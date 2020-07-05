@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="css/main.css?v=20190423">
 </head>
 <body>
-    <h2 id="size" style=" height: 35px; background: #fcfcfc; width: 100mm; margin: 0 auto; line-height: 10mm; text-align: center; ">A4：210*297</h2>
+    <h2 id="title" style=" height: 35px; background: #fcfcfc; width: 100%; margin:0;display:flex;justify-content: center; line-height: 10mm; text-align: center; ">未命名标题</h2>
     <div id="container"><div class="paper"></div></div>
+    <div id="area-shadow"></div>
     <div class="insert-paper-button">
         <button type="button" class="btn btn-fullsize fn-insert-paper">添加一页</button>
+        <button type="button" class="btn btn-fullsize fn-delete-paper">删除一页</button>
     </div>
     <div id="tool-bar-title" class="block droppable">
         <p class="title">组件类型</p>
@@ -30,7 +32,7 @@
         <ul id="tool-bar-content">
             <li class="type-global">
                 <ul>
-                    <li><label>标题：</label><input type="text" name="global.title" value="Title"></li>
+                    <li><label>标题：</label><input type="text" name="global.title" value="未命名标题"></li>
                     <li><label>单位：</label><input type="text" name="global.creator" value="CLF"></li>
                     <li><label>作者：</label><input type="text" name="global.author" value="Grass"></li>
                     <li>
@@ -209,6 +211,10 @@
             </li>
         </ul>
     </form>
+    <div id="component-tree" class="block droppable">
+        <p class="title">组件树</p>
+        <ul></ul>
+    </div>
     <div class="block html droppable">
         <p class="title">排版源码</p>
         <textarea id="html"></textarea>
@@ -217,7 +223,7 @@
         <p class="title">生成的PHP代码</p>
         <textarea id="output"></textarea>
     </div>
-    <div id="help" class="block droppable">
+    <!-- <div id="help" class="block droppable">
         <p class="title">使用小提示</p>
         <ol>
             <li>选择合适的组件类型，点击空白处新增组件</li>
@@ -226,7 +232,7 @@
             <li>选中组件，可以修改对应的“组件属性”</li>
             <li>可以复制“排版源码”分享给其他小伙伴使用</li>
         </ol>
-    </div>
+    </div> -->
     <script src="js/jquery.min.js"></script>
     <script src="js/main.js?v=20190423"></script>
 </body>

@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 body {
-    margin:0;padding:0;background:#525659;font-size:12px;user-select: none;-webkit-user-select: none;
+    margin:0;padding:0;background:rgb(230, 230, 230);font-size:12px;user-select: none;-webkit-user-select: none;
 }
 ul{
     list-style:none;margin:0;padding:0
@@ -21,7 +21,7 @@ input[type=checkbox] {
     width: 210mm;margin: 24px auto 0;font-family:仿宋;
 }
 #container .paper {
-    width: 210mm;height:297mm;margin: 0px auto 14px;background-color:#fff;position:relative;overflow:hidden;
+    width: 210mm;height:297mm;margin: 0px auto 14px;background-color:#fff;position:relative;
 }
 #container .item {
     position:absolute;white-space: nowrap;overflow: hidden;
@@ -101,7 +101,8 @@ input[type=checkbox] {
     border-radius: 2px;
     margin: 0;
     padding: 5px 5px;
-    background: #c8c8c8;
+    background: #4e71ff;
+    color:#fff;
     font-weight: 700;
     cursor: move;
 }
@@ -126,4 +127,29 @@ input[type=checkbox] {
 }
 .btn-fullsize {
     width:100%;
+}
+
+#component-tree {
+    position:fixed;right:0;top:105mm;background:#fff;
+    width:200px;
+}
+#component-tree ul {
+    height:400px;
+    overflow: auto;
+}
+#component-tree li {
+    margin:4px;
+}
+#component-tree li.active {
+    border:1px dashed blue;
+}
+#area-shadow {
+    position: absolute;
+    background-color: blue;
+    opacity: 0.2;
+    border: 1px dashed #d9d9d9;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
 }

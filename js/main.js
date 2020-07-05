@@ -3,10 +3,12 @@
     var type = 'global';
     // 当前选中组件
     var current = null;
+    var selectedList = [];
+
     var global = {
         creator: 'CLF',
         author: 'Grass',
-        title: 'Title',
+        title: '未命名标题',
         fontFamily: 'stsongstdlight',
         paper: 'A4'
     };
@@ -41,9 +43,11 @@
 
     var $form = $('#form');
     var $html = $('#html');
-    var $size = $('#size');
+    var $title = $('#title');
     var $output = $('#output');
     var $container = $('#container');
+    var $areaShadow = $('#area-shadow');
+    var $componentTree = $('#component-tree');
     var $toolBarTitle = $('#tool-bar-title');
     var $toolBarContent = $('#tool-bar-content');
 
@@ -478,16 +482,19 @@
     });
 
     // 画布点击,绘制组件,标记当前组件
-    $container.on('mousedown', function(event) {
+    var isArea = false;
+    $container.on('mouseup', function(event) {
         if (event.button !== 0) return;
+        if (isArea) return;
         var opt = getConfig();
         current = null;
         
-        $('.active').removeClass('active');
+        $('.active', $container).removeClass('active');
         if ($(event.target).hasClass('item')) {
             $(event.target).addClass('active');
             current = event.target;
             loadConfig(current);
+            selectedList = [];
             return true;
         }
         if (type === 'global') {
@@ -509,6 +516,8 @@
     $container.on('mousedown', function(event) {
         if (event.button === 2) {
             current = null;
+            selectedList = [];
+            isArea = false;
             $('.active').removeClass('active');
         }
     });
@@ -522,6 +531,7 @@
         var isMouseDown = false;
         var element = null;
         var width = height = 0;
+        var selectedCache = [];
 
         var component = function() {
             var width, height, offsetX, offsetY, type;
@@ -569,7 +579,18 @@
                     component.setType(e);
                 }
                 
-                element = this;
+                if (selectedList.length) {
+                    for (var i = 0; i < selectedList.length; i++) {
+                        var item = selectedList[i];
+                        selectedCache[i] = {
+                            left: parseInt(item.style.left),
+                            top: parseInt(item.style.top)
+                        };
+                    }
+                    return;
+                } else {
+                    element = this;
+                }
             }
         });
         $(document).on('mousemove', function (e) {
@@ -599,6 +620,15 @@
                         setConfig(e.target.dataset.type + '.height', parseInt(element.style.height));
                         break;
                     default:
+                        if (selectedList.length) {
+                            for (var i = 0; i < selectedList.length; i++) {
+                                var item = selectedList[i];
+                                item.style.left = selectedCache[i].left + pxToMm(nx - x,'x') + 'mm';
+                                item.style.top = selectedCache[i].top + pxToMm(ny - y,'y') + 'mm';
+                            }
+                            isArea = true;
+                            return;
+                        }
                         element.style.left = Math.ceil(pxToMm(nl, 'x')) + 'mm';
                         element.style.top = Math.ceil(pxToMm(nt, 'y')) + 'mm';
                         setConfig(e.target.dataset.type + '.x', parseInt(element.style.left));
@@ -619,6 +649,30 @@
     $(document).on('keydown', function(event) {
         if (event.target !== document.body) {
             return true;
+        }
+        if (selectedList.length) {
+            var map = {
+                37: {key:'left', value:-1},
+                38: {key:'top', value:-1},
+                39: {key:'left', value:1},
+                40: {key:'top', value:1},
+            }
+            for (var i = 0; i < selectedList.length; i++) {
+                var item = selectedList[i];
+                if (map[event.keyCode]) {
+                    var key = map[event.keyCode].key;
+                    var value = map[event.keyCode].value;
+                    item.style[key] = parseInt(item.style[key]) + value + 'mm';
+                } else if (event.keyCode === 46) {
+                    $(item).remove();
+                }
+            }
+            
+            if ($.inArray(event.keyCode, [37, 38, 39, 40, 46]) !== -1) {
+                build();
+                return false;
+            }
+            return;
         }
         if (!current) {
             return true;
@@ -647,6 +701,82 @@
         return true;
     });
 
+    // 选区选择组件
+    (function(){
+        var shadow = $areaShadow[0];
+        var isMouseDown = false;
+        var l = 0;
+        var t = 0;
+        $(document).on('mousedown', function(e) {
+            if (e.button !== 0) return;
+            if (!$(e.target).hasClass('paper')) {
+                return;
+            }
+            isMouseDown = true;
+            shadow.style.top = e.pageY+4 + 'px';
+            shadow.style.left = e.pageX+4   + 'px';
+            l = e.pageX;
+            t = e.pageY;
+        });
+        $(document).on('mousemove', function (e) {
+            if (!isMouseDown) return;
+            if (Math.abs(l-e.pageX) < 10) {
+                return;
+            }
+            isArea = true;
+            if (e.pageX < l) {
+              shadow.style.left = e.pageX + 'px';
+              shadow.style.width = (l - e.pageX) + 'px';
+            } else {
+              shadow.style.width = (e.pageX - l) + 'px';
+            }
+            if (e.pageY < t) {
+              shadow.style.top = e.pageY + 'px';
+              shadow.style.height = (t - e.pageY) + 'px';
+            } else {
+              shadow.style.height = (e.pageY - t) + 'px';
+            }
+        });
+        $(document).on('mouseup', function (e) {
+            if (!isMouseDown) return;
+            isArea = false;
+            shadow.style.bottom = parseInt(shadow.style.top) + parseInt(shadow.style.height) + 'px';
+            shadow.style.right = parseInt(shadow.style.left) + parseInt(shadow.style.width) + 'px';
+            selectedList = findSelected();
+            isMouseDown = false;
+            clearDragData();
+        });
+        function findSelected() {
+            var selectedList = [];
+            var blockList = $container.find('.item');
+            blockList.removeClass('active');
+            for (var i = 0; i < blockList.length; i++) {
+                var left = $(blockList[i]).offset().left;
+                var right = $(blockList[i]).width() + left;
+                var top = $(blockList[i]).offset().top;
+                var bottom = $(blockList[i]).height() + top;
+                var leftFlag = parseInt(shadow.style.left) <= left && left <= parseInt(shadow.style.right);
+                var rightFlag = parseInt(shadow.style.left) <= right && right <= parseInt(shadow.style.right);
+                var topFlag = parseInt(shadow.style.top) <= top && top <= parseInt(shadow.style.bottom);
+                var bottomFlag = parseInt(shadow.style.top) <= bottom && bottom <= parseInt(shadow.style.bottom);
+                if ((leftFlag || rightFlag) && (topFlag || bottomFlag)) {
+                    selectedList.push(blockList[i]);
+                    $(blockList[i]).addClass('active');
+                }
+            }
+            return selectedList;
+        }
+    
+        function clearDragData() {
+          shadow.style.width = 0;
+          shadow.style.height = 0;
+          shadow.style.top = 0;
+          shadow.style.left = 0;
+          shadow.style.bottom = 0;
+          shadow.style.right = 0;
+        }
+    }());
+
     // 添加一页
     $('.fn-insert-paper').on('click', function () {
         var size = getPaperSize(global.paper);
@@ -657,6 +787,32 @@
         build();
     });
 
+    // 删除一页
+    $('.fn-delete-paper').on('click', function () {
+        if ($container.find('.paper').length === 1) {
+            return alert('最少保留一页');
+        }
+        if (confirm('确定要删除一页吗？')) {
+            $container.find('.paper:last').remove();
+            build();
+        }
+    });
+
+    $componentTree.on('click', 'li', function() {
+        var page = $(this).data('page');
+        var index = $(this).data('index');
+        if (page === undefined) {
+            return;
+        }
+        var item = $container.find('.paper').eq(page).find('.item').eq(index);
+        $(this).addClass('active').siblings().removeClass('active');
+        $('.active', $container).removeClass('active');
+        item.addClass('active');
+        current = item[0];
+        loadConfig(current);
+        selectedList = [];
+    });
+
     // 修改配置,更新组件
     $form.on('input', 'input,textarea', function() {
         if (type === 'global') {
@@ -665,6 +821,7 @@
                 case 'global.author':
                 case 'global.title':
                     global[this.name.split('.')[1]] = this.value;
+                    $title.html(getConfig('global.title'));
                     break;
             }
             build();
@@ -682,7 +839,6 @@
                 case 'global.paper.size':
                     var size = getPaperSize(this.value);
                     global.paper = this.value;
-                    $size.html(global.paper + '：' + size.width + '*' + size.height);
                     $container.css('width', size.width + 'mm');
                     $container.find('.paper').css({
                         width: size.width + 'mm',
@@ -719,6 +875,7 @@
         setConfig('global.author', global.author);
         setConfig('global.font.family', global.fontFamily);
         setConfig('global.paper.size', global.paper);
+        $form.find('input').trigger('input');
         $form.find('select').trigger('change');
         build();
     });
@@ -754,7 +911,7 @@
             return arrDPI;
         }();
         return function(px, type) {
-            return px * 25.3 / dpi[type];
+            return parseInt((px * 25.4 / dpi[type]).toFixed(0));
         }
     }();
 
@@ -791,6 +948,7 @@
         }));
         $output.val(getPHPCode());
         runtime = $.extend({}, runtimeCopy);
+        $componentTree.find('ul').html(getTreeHtml(getComponentTree()));
     }
 
     function getPHPCode() {
@@ -903,6 +1061,39 @@
         return template.replace(pattern, function (match, key, value) {
             return key in data ? data[key] : '';
         });
+    }
+
+    function getTreeHtml(tree) {
+        var html = [];
+        $(tree).each(function() {
+            html.push('<li>' + this.label + '</li>');
+            $(this.items).each(function() {
+                html.push('<li data-page="' + this.page + '" data-index="' + this.index + '">&nbsp;&nbsp;&nbsp;&nbsp;' + this.label + '</li>');
+            });
+        });
+        return html.join('');
+    }
+
+    function getComponentTree() {
+        var tree = [];
+        $container.find('.paper').each(function(page) {
+            var data = [];
+            $(this).find('.item').each(function(index) {
+                var type = $(this).data('type');
+                var variable = $(this).attr('data-var');
+                var text = $(this).text();
+                data.push({
+                    label: type + '(' + ( variable || text ) + ')',
+                    page: page,
+                    index: index
+                })
+            });
+            tree.push({
+                label: '第' + (page + 1) + '页',
+                items: data,
+            });
+        });
+        return tree;
     }
 
     // 自动加载/保存代码
