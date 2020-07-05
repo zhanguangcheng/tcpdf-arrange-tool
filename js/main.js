@@ -640,6 +640,7 @@
         $(document).on('mouseup', function () {
             if (isMouseDown) {
                 isMouseDown = false;
+                isArea = false;
                 build();
             }
         });
@@ -814,7 +815,7 @@
     });
 
     // 修改配置,更新组件
-    $form.on('input', 'input,textarea', function() {
+    $form.on('input click', 'input,textarea', function() {
         if (type === 'global') {
             switch (this.name) {
                 case 'global.creator':
