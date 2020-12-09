@@ -37,6 +37,7 @@
         fontStyleI: false,
         fontStyleU: false,
         background: '#ffffff',
+        color: '#000000',
         cellPadding: 0,
     };
     var runtimeCopy = $.extend({}, runtime);
@@ -66,6 +67,10 @@
                 element.style.fontWeight = opt['text.font.style.b'] ? 'bold' : 'normal';
                 element.style.fontStyle = opt['text.font.style.i'] ? 'italic' : 'normal';
                 element.style.textDecoration = opt['text.font.style.u'] ? 'underline' : 'none';
+                if (opt['text.color'] !== runtimeCopy.color) {
+                    element.style.color = opt['text.color'];
+                    element.dataset.color = opt['text.color'];
+                }
                 return element;
             },
             loadConfig: function (element) {
@@ -79,6 +84,7 @@
                 $('[name="text.font.style.i"]').prop('checked', element.style.fontStyle === 'italic');
                 $('[name="text.font.style.u"]').prop('checked', element.style.textDecoration === 'underline');
                 $('[name="text.var"]').val(element.dataset.var);
+                $('[name="text.color"]').val(element.dataset.color || runtimeCopy.color);
             },
             update: function (element) {
                 var opt = getConfig();
@@ -92,6 +98,10 @@
                 element.style.textDecoration = opt['text.font.style.u'] ? 'underline' : 'none';
                 element.innerHTML = opt['text.text'];
                 element.dataset.var = opt['text.var'];
+                if (opt['text.color'] !== runtimeCopy.color) {
+                    element.style.color = opt['text.color'];
+                    element.dataset.color = opt['text.color'];
+                }
             },
             getCode: function (element) {
                 var self = this;
@@ -139,8 +149,14 @@
                 element.style.fontStyle = opt['cell.font.style.i'] ? 'italic' : 'normal';
                 element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
                 element.style.padding = opt['cell.padding'] + 'mm';
-                element.style.background = opt['cell.background'];
-                element.dataset.background = opt['cell.background'];
+                if (opt['cell.background'] !== runtimeCopy.background) {
+                    element.style.background = opt['cell.background'];
+                    element.dataset.background = opt['cell.background'];
+                }
+                if (opt['cell.color'] !== runtimeCopy.color) {
+                    element.style.color = opt['cell.color'];
+                    element.dataset.color = opt['cell.color'];
+                }
                 return element;
             },
             loadConfig: function (element) {
@@ -164,6 +180,7 @@
                 $('[name="cell.padding"]').val(parseInt(element.style.padding) || 0);
                 $('[name="cell.var"]').val(element.dataset.var);
                 $('[name="cell.background"]').val(element.dataset.background || '#ffffff');
+                $('[name="cell.color"]').val(element.dataset.color || '#000000');
             },
             update: function (element) {
                 var opt = getConfig();
@@ -188,8 +205,14 @@
                 element.style.textDecoration = opt['cell.font.style.u'] ? 'underline' : 'none';
                 element.style.padding = opt['cell.padding'] + 'mm';
                 element.dataset.var = opt['cell.var'];
-                element.style.background = opt['cell.background'];
-                element.dataset.background = opt['cell.background'];
+                if (opt['cell.background'] !== runtimeCopy.background) {
+                    element.style.background = opt['cell.background'];
+                    element.dataset.background = opt['cell.background'];
+                }
+                if (opt['cell.color'] !== runtimeCopy.color) {
+                    element.style.color = opt['cell.color'];
+                    element.dataset.color = opt['cell.color'];
+                }
             },
             getCode: function (element) {
                 var self = this;
@@ -406,7 +429,8 @@
             var isI = element.style.fontStyle === 'italic';
             var isU = element.style.textDecoration === 'underline';
             var family = element.dataset.fontFamily || global.fontFamily;
-            var background = element.dataset.background || runtime.background;
+            var background = element.dataset.background || runtimeCopy.background;
+            var color = element.dataset.color || runtimeCopy.color;
             var style = (isB ? 'B' : '') + (isI ? 'I' : '') + (isU ? 'U' : '');
             if (
                 family !== runtime.fontFamily
@@ -447,6 +471,16 @@
                     r: parseInt(background.substr(1, 2), 16),
                     g: parseInt(background.substr(3, 2), 16),
                     b: parseInt(background.substr(5, 2), 16)
+                }));
+            }
+
+            // 文本颜色
+            if (color !== runtime.color) {
+                runtime.color = color;
+                code.push(render('$pdf->SetTextColor({r}, {g}, {b});', {
+                    r: parseInt(color.substr(1, 2), 16),
+                    g: parseInt(color.substr(3, 2), 16),
+                    b: parseInt(color.substr(5, 2), 16)
                 }));
             }
             return code.join("\n") + (code.length ? "\n" : '');
